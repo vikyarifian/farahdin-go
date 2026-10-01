@@ -302,6 +302,20 @@ templ Creator() {
 			</p>
 			@components.Divider()
 		</section>
+		<section class="flex flex-col p-4 pt-2">
+			<h2 class="text-lg font-semibold">{ i18n.T(ctx, "Dukung Farahdin", "Support Farahdin") }</h2>
+			<p class="mt-1 text-sm text-muted">{ i18n.T(ctx, "Suka dengan Farahdin? Traktir kreatornya lewat Trakteer.", "Enjoying Farahdin? Treat the creator on Trakteer.") }</p>
+			<a
+				href="https://trakteer.id/vikyarifian"
+				target="_blank"
+				rel="noopener"
+				class="mt-3 inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-md bg-primary px-4 py-2 font-medium text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+			>
+				@components.Icon("cafe-outline", "size-5")
+				{ i18n.T(ctx, "Traktir di Trakteer", "Treat me on Trakteer") }
+				<span class="sr-only">{ i18n.T(ctx, "(buka di tab baru)", "(opens in a new tab)") }</span>
+			</a>
+		</section>
 	}
 }
 
