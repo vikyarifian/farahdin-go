@@ -1,0 +1,13 @@
+{
+  "name": "farahdin-go-assets",
+  "private": true,
+  "description": "Build-time only: compiles Tailwind CSS. Nothing from node_modules ships to the browser.",
+  "scripts": {
+    "css": "tailwindcss -i web/static/css/input.css -o web/static/css/app.css --minify",
+    "css:watch": "tailwindcss -i web/static/css/input.css -o web/static/css/app.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
+}

@@ -1,0 +1,21 @@
+# build output
+/bin/
+/tmp/
+
+# old local SQLite data (before ADR 0008)
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# secrets
+.env
+
+# build-time tooling
+node_modules/
+
+# generated CSS (run `make css`)
+/web/static/css/app.css
+
+# Convex exports contain personal data
+*.zip

@@ -1,0 +1,36 @@
+# Deviations
+
+Intentional differences between the React Native app and the PWA. Each one is referenced from
+code comments or the behavior map by its ID.
+
+| ID | Area | Source behaviour | PWA behaviour | Reason |
+|---|---|---|---|---|
+| D-01 | Navigation | Feature screens, Edit Profile and Settings are modals; results are a sliding modal | Each is a route (`/primbon/5`, `/profile/edit`, …); results are a full-height sheet rendered into `#result` | Browser back button, deep links, no client state |
+| D-02 | Auth | Clerk Google SSO; profile photo from Clerk; React logo as photo fallback | Google OIDC directly; photo from Google; person icon fallback | ADR 0004 |
+| D-03 | Birthday side effect | Horoscope/Primbon save a changed birthday as soon as it is picked | Saved when the form is submitted | Server-rendered forms have no "on pick" moment |
+| D-04 | Errors | Upstream/parse failures are swallowed (spinner stops, nothing shown); Matrix shows `alert()` and leaves the spinner running | Friendly inline error; Matrix validation inline; Matrix chart still shown when the reading fails, with a notice | Definition of Done: explicit error states |
+| D-05 | Validation | No validation; `updateUser` accepts any email/username from the client | Required name/dream/partner where shown; profile bounds (birthday 1900…today, gender Male/Female, lengths); email and username are not editable through the API | Server-side validation; closes an account-takeover-by-email vector |
+| D-06 | Horoscope sign | Initial sign is the stored `user.zodiac` (crashes when empty) | Sign always derived from the birthday | Same value when data is consistent; no crash |
+| D-07 | Year strings | Horoscope promo cut uses the **birth** year; Clairvoyance cuts at hard-coded "2025 Tarot Reading" | Current year in both | The source strings no longer match in 2026; with them the promo/junk text would show |
+| D-08 | Upstream drift | Tanggal Jadi: `split(ads)[1]`; Jodoh advice cut at `<a href="` | Fallback to the whole text when the ads snippet is absent; also cut at `<a ` | primbon.com markup changed (verified 2026-10-01); the source fails on it |
+| D-09 | Translation | Primbon Arti Nama and Tafsir Mimpi always call Translate, even in ID; query not URL-encoded | Translate only when needed; query encoded | Fewer upstream calls; `#`/`+` no longer corrupt the text |
+| D-10 | Greeting | Device clock | Server clock in `APP_TIMEZONE` (default Asia/Jakarta), replaced by the device clock in `app.js` | Works without JS; same result with JS |
+| D-11 | Language storage | AsyncStorage `lang` | Cookie `lang` | Server rendering needs it on every request |
+| D-12 | Icons | Ionicons + Entypo `home`, FontAwesome `user`, MaterialIcons `alternate-email`/`person`/`settings`/`logout` | Ionicons only (`home`, `person`, `at`, `settings`, `log-out`) via one SVG sprite | One icon set, no icon font |
+| D-13 | Date input | Native spinners (iOS needs "Done") | `<input type="date">`, min 1900-01-01, max today for birthdays | Browser-native |
+| D-14 | Tarot dealing | `sort(() => Math.random() - 0.5)` on the phone; selection in React state | Fisher–Yates on the server; selection with radio/checkbox inputs (CSS raises the chosen card) | Unbiased; works without JS |
+| D-15 | Matrix display | Date of birth in device locale with `.` separators; SVG viewBox `0 0 680 600` | `DD.MM.YYYY`; viewBox `-20 -30 720 660` so the 0/20/40/60-year labels outside the frame are visible | Deterministic output; labels were clipped |
+| D-16 | Result text | Empty strings render as empty `<Text>` lines | Empty lines (and lone "." / `<br>`) are not rendered | Cleaner HTML; same content |
+| D-17 | Current user | `users.getUser` returns `createUser` (bug, inventory U-01) | Returns the signed-in user | Intended behaviour; open question Q-01 |
+| D-18 | Copy | True Love sheet label "You Card" | "Your Card" | Typo |
+| D-19 | Assets | Ships angel images 23–36, React logos, SpaceMono | Not shipped | Unreferenced |
+| D-20 | Back arrows | Profile/Creator tab headers call `router.back()` | Link to Home; `app.js` uses `history.back()` when the previous page is in the app | Tabs have no stack in the browser |
+| D-21 | Logout | `signOut()` then open `/` | Session row deleted, cookie cleared, `Clear-Site-Data: "cache"`, redirect `/login` | Server sessions; nothing private is cached anyway |
+| D-22 | Bottom tabs | Feature screens, Edit Profile and Settings are modals that cover the tab bar | The tab bar is shown on every signed-in page (feature pages under Home, Edit Profile/Settings under Profile) | Product request 2026-10-02 |
+| D-23 | Hero image | Fixed 250px box, `cover` (crops on wide screens) | Box keeps the image's 3:2 ratio, image fully visible, "Farahdin" on its lower edge | Product request 2026-10-02 |
+| D-24 | Fonts | TTF/OTF bundled in the app (640 KB) | Latin-subset WOFF2 (84 KB), preloaded, cached 30 days and by the service worker | Font loading delay on the web |
+| D-25 | Creator route | Tab route named `inbox` (shows the creator page) | Route `/creator`; `/inbox` answers 301 → `/creator` | Name matches the content (product request 2026-10-02) |
+| D-26 | Home title | "Farahdin" 45px, bold, letter-spaced | Same style as the Creator page: Javassoul 60px, regular | Product request 2026-10-02 (the font has no bold weight; the browser was faking it) |
+| D-27 | Tab order | Home, Profile, Inbox(@) | Home, Creator(@), Profile | Product request 2026-10-02 |
+| D-28 | Tarot reset | The deck is reshuffled and the selection cleared when Pick/Read is pressed, behind the open sheet | Done (or Escape) reloads the spread page: new shuffle, no selection | Product request 2026-10-02; same end state, done server-side |
+| D-29 | horoscope.com promo | Not present when the source was written | Text is cut at "Discover the key to your unique life path…" (Tarot, True Love, Clairvoyance, Horoscope pages), before translation; this also drops the trailing "True Love Tarot Reading" line | Upstream drift (seen 2026-10-02); product request |

@@ -1,0 +1,122 @@
+package layouts
+
+import (
+	"context"
+
+	"github.com/vikyarifian/farahdin-go/internal/i18n"
+	"github.com/vikyarifian/farahdin-go/web"
+	"github.com/vikyarifian/farahdin-go/web/templates/components"
+)
+
+// htmxConfig swaps every response (errors are rendered as friendly
+// fragments by the server), disables eval and inline indicator styles (CSP).
+const htmxConfig = `{"responseHandling":[{"code":"204","swap":false},{"code":"...","swap":true}],"allowEval":false,"includeIndicatorStyles":false,"historyCacheSize":0,"selfRequestsOnly":true}`
+
+// Base is the HTML document shell.
+templ Base(title string) {
+	<!DOCTYPE html>
+	<html lang={ htmlLang(ctx) } class="bg-background">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+			<title>{ title }</title>
+			<meta name="description" content={ i18n.T(ctx, "Primbon, horoskop, tarot, kewaskitaan dan matriks takdir.", "Primbon, horoscope, tarot, clairvoyance and matrix destiny.") }/>
+			<meta name="theme-color" content="#231d32"/>
+			<meta name="color-scheme" content="dark"/>
+			<meta name="htmx-config" content={ htmxConfig }/>
+			<link rel="manifest" href="/manifest.webmanifest"/>
+			<link rel="icon" type="image/png" sizes="32x32" href={ web.Asset("icons/favicon-32.png") }/>
+			<link rel="apple-touch-icon" href={ web.Asset("icons/apple-touch-icon.png") }/>
+			<meta name="apple-mobile-web-app-capable" content="yes"/>
+			<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+			// Fonts are preloaded with the exact URL app.css uses, so they arrive with the CSS instead of after it.
+			<link rel="preload" href="/static/fonts/ebgaramond-regular.woff2" as="font" type="font/woff2" crossorigin/>
+			<link rel="preload" href="/static/fonts/agaramond-sc.woff2" as="font" type="font/woff2" crossorigin/>
+			<link rel="preload" href="/static/fonts/javassoul.woff2" as="font" type="font/woff2" crossorigin/>
+			<link rel="stylesheet" href={ web.Asset("css/app.css") }/>
+			<script src={ web.Asset("js/htmx.min.js") } defer></script>
+			<script src={ web.Asset("js/app.js") } defer></script>
+		</head>
+		<body class="min-h-dvh bg-background font-sans text-white antialiased">
+			<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-primary focus:px-3 focus:py-2 focus:text-black">{ i18n.T(ctx, "Lewati ke konten", "Skip to content") }</a>
+			<div id="network-status" role="status" aria-live="polite" hidden class="fixed inset-x-0 top-0 z-40 bg-red-900 px-4 py-2 text-center text-sm text-white">
+				{ i18n.T(ctx, "Kamu sedang offline. Fitur bacaan membutuhkan koneksi internet.", "You are offline. Readings need an internet connection.") }
+			</div>
+			<div id="update-banner" hidden class="fixed inset-x-4 bottom-20 z-40 mx-auto flex max-w-md items-center justify-between gap-3 rounded-lg bg-surface-light px-4 py-3 text-sm shadow-lg">
+				<span>{ i18n.T(ctx, "Versi baru tersedia.", "A new version is available.") }</span>
+				<button type="button" data-sw-update class="rounded bg-primary px-3 py-1.5 font-medium text-black">{ i18n.T(ctx, "Muat ulang", "Reload") }</button>
+			</div>
+			{ children... }
+		</body>
+	</html>
+}
+
+func htmlLang(ctx context.Context) string {
+	if i18n.IsID(ctx) {
+		return "id"
+	}
+	return "en"
+}
+
+// Tab identifies the active bottom tab.
+type Tab int
+
+const (
+	TabNone Tab = iota
+	TabHome
+	TabProfile
+	TabCreator
+)
+
+// App is a signed-in tab screen with the bottom tab bar of app/(tabs)/_layout.tsx.
+templ App(title string, active Tab) {
+	@Base(title) {
+		<div class="mx-auto flex min-h-dvh max-w-xl flex-col">
+			<main id="main" class="flex-1 px-2.5 pb-20">
+				{ children... }
+			</main>
+			@TabBar(active)
+		</div>
+	}
+}
+
+// TabBar is the bottom navigation, shown on every signed-in page.
+templ TabBar(active Tab) {
+	<nav class="fixed inset-x-0 bottom-0 z-20 border-t border-surface bg-background pb-[env(safe-area-inset-bottom)]" aria-label={ i18n.T(ctx, "Navigasi utama", "Main navigation") }>
+		<ul class="mx-auto flex h-14 max-w-xl items-stretch justify-around">
+			@tab("/", "home", i18n.T(ctx, "Beranda", "Home"), active == TabHome)
+			@tab("/creator", "at", i18n.T(ctx, "Pencipta", "Creator"), active == TabCreator)
+			@tab("/profile", "person", i18n.T(ctx, "Profil", "Profile"), active == TabProfile)
+		</ul>
+	</nav>
+}
+
+templ tab(href string, icon string, label string, active bool) {
+	<li class="flex-1">
+		<a
+			href={ templ.SafeURL(href) }
+			class={ "flex h-full items-center justify-center focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-primary",
+				templ.KV("text-primary", active), templ.KV("text-muted hover:text-white", !active) }
+			if active {
+				aria-current="page"
+			}
+		>
+			@components.Icon(icon, "size-6")
+			<span class="sr-only">{ label }</span>
+		</a>
+	</li>
+}
+
+// Feature is a full-screen feature page (the source app's modal screens);
+// active is the tab the page belongs to.
+templ Feature(title string, backHref string, active Tab) {
+	@Base(title + " · Farahdin") {
+		<div class="mx-auto flex min-h-dvh max-w-xl flex-col">
+			@components.Header(title, backHref)
+			<main id="main" class="flex-1 px-2.5 pb-24">
+				{ children... }
+			</main>
+			@TabBar(active)
+		</div>
+	}
+}

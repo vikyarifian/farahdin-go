@@ -1,0 +1,401 @@
+// Code generated from farahdin-react-native/app/pages/matrix-destiny.tsx (the
+// <Svg.Svg id="matrix"> block) by a one-off script: tags lower-cased, React
+// props mapped to SVG attributes, {points.x}/{years.x} mapped to the Go matrix.
+// Coordinates are unchanged so the chart matches the source app.
+
+package pages
+
+import (
+	"strconv"
+
+	"github.com/vikyarifian/farahdin-go/internal/domain"
+)
+
+// MatrixChart is the destiny matrix diagram.
+templ MatrixChart(m domain.Matrix, title string) {
+	<svg viewBox="-20 -30 720 660" id="matrix" class="h-auto w-full" role="img" aria-labelledby="matrix-chart-title">
+		<title id="matrix-chart-title">{ title }</title>
+		<g id="matrix-frame">
+			<rect stroke="white" fill="none" stroke-width="1.5px" x="163.63" y="126.14" width="340.16" height="340.16"></rect>
+			<rect stroke="white" fill="none" stroke-width="1.5px" x="227.87" y="127.54" width="340.16" height="340.16" transform="translate(-158.13 367.16) rotate(-45)"></rect>
+			<polygon stroke-miterlimit="10" stroke="white" fill="none" stroke-width="1.5px" points="333.7 7.76 537.64 92.28 622.17 296.22 537.64 501.16 333.7 584.68 129.76 500.16 45.24 296.22 129.76 92.28 333.7 7.76"></polygon>
+			<line stroke="white" fill="none" stroke-width="1.5px" x1="333.7" y1="27.76" x2="333.7" y2="564.68"></line>
+			<line stroke="white" fill="none" stroke-width="1.5px" x1="65.24" y1="296.22" x2="602.17" y2="296.22"></line>
+			<g>
+				<line stroke="#b653f7" fill="#b653f7" stroke-width="1.5px" x1="442" y1="405" x2="226" y2="189"></line>
+				<polygon stroke="#b653f7" fill="#b653f7" points="441 402 439 404 442 405 441 402"></polygon>
+				<polygon stroke="#b653f7" fill="#b653f7" points="226 189 229 190 227 192 226 189"></polygon>
+			</g>
+			<g>
+				<line stroke="#ea4631" fill="#ea4631" x1="442" y1="189" x2="226" y2="405"></line>
+				<polygon stroke="#ea4631" fill="#ea4631" points="442 189 439 190 441 192 442 189"></polygon>
+				<polygon stroke="#ea4631" fill="#ea4631" points="226 405 227 402 229 404 226 405"></polygon>
+			</g>
+			<line stroke-miterlimit="10" stroke="white" fill="none" stroke-dasharray="0, 25, 10, 50, 10, 50, 10, 25" stroke-width="1.5px" x1="502" y1="297" x2="335" y2="465"></line>
+			<text fill="#f5f5f5" font-size="11.5587px" transform="translate(238.77 188.48) rotate(45)">
+				male generation line
+			</text>
+			<text fill="#f5f5f5" font-size="11.5587px" transform="translate(351.7 264.98) rotate(-45)">
+				female generation line
+			</text>
+			<g id="Heart" transform="translate(100, 100)">
+				<path
+					d="M397 524.137C397 529 401.02 531.591 403.962 533.911C405 534.729 406 535.5 407 535.5C408 535.5 409 534.73 410.038 533.91C412.981 531.592 417 529 417 524.138C417 519.275 411.5 515.826 407 520.502C402.5 515.825 397 519.274 397 524.137Z"
+					fill="#FC5555"
+					transform="translate(-145 -250)"
+				></path>
+			</g>
+			<g transform="translate(405, 345)">
+				<text fill="#0b9f27" font-size="24" stroke-width="5" font-weight="600">$</text>
+			</g>
+		</g>
+		<g id="points-basic">
+			<circle fill="#b653f7" cx="79.2" cy="297" r="33.5"></circle>
+			<text fill="#f5f5f5" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="apoint" transform="translate(79.2 299)">{ strconv.Itoa(m.Points["apoint"]) }</text>
+			<circle fill="#b653f7" cx="333.7" cy="42" r="33.5"></circle>
+			<text fill="#f5f5f5" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="bpoint" transform="translate(333.7 42)">{ strconv.Itoa(m.Points["bpoint"]) }</text>
+			<circle fill="#ea4631" cx="587.13" cy="297" r="33.5"></circle>
+			<text fill="#f5f5f5" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="cpoint" transform="translate(587.4 299)">{ strconv.Itoa(m.Points["cpoint"]) }</text>
+			<circle fill="#ea4631" cx="332.7" cy="554" r="33.5"></circle>
+			<text fill="#f5f5f5" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="dpoint" transform="translate(332.7 557)">{ strconv.Itoa(m.Points["dpoint"]) }</text>
+			<circle fill="#fbe49d" cx="334" cy="297" r="33.5"></circle>
+			<text fill="#000000" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="epoint" transform="translate(334 299)">{ strconv.Itoa(m.Points["epoint"]) }</text>
+			<circle fill="#fffcf0" cx="151" cy="114.22" r="33.5"></circle>
+			<text fill="#000000" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="fpoint" transform="translate(151 115)">{ strconv.Itoa(m.Points["fpoint"]) }</text>
+			<circle fill="#fffcf0" cx="515.1" cy="114.22" r="33.5"></circle>
+			<text fill="#000000" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="gpoint" transform="translate(515.1 115)">{ strconv.Itoa(m.Points["gpoint"]) }</text>
+			<circle fill="#fffcf0" cx="514.1" cy="479.62" r="33.5"></circle>
+			<text fill="#000000" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="ipoint" transform="translate(514.1 481)">{ strconv.Itoa(m.Points["ipoint"]) }</text>
+			<circle fill="#fffcf0" cx="153" cy="479.62" r="33.5"></circle>
+			<text fill="#000000" font-size="29.7851px" text-anchor="middle" dominant-baseline="central" id="hpoint" transform="translate(153 481)">{ strconv.Itoa(m.Points["hpoint"]) }</text>
+			<circle fill="#ed7233" cx="332.59" cy="466" r="21"></circle>
+			<text fill="#f5f5f5" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="jpoint" transform="translate(332.69 466)">{ strconv.Itoa(m.Points["jpoint"]) }</text>
+			<circle fill="#ed7233" cx="500" cy="297" r="21"></circle>
+			<text fill="#f5f5f5" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="npoint" transform="translate(500 299)">{ strconv.Itoa(m.Points["npoint"]) }</text>
+			<circle fill="#fffcf0" cx="418.18" cy="380.69" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="lpoint" transform="translate(418.18 382)">{ strconv.Itoa(m.Points["lpoint"]) }</text>
+			<circle fill="#fffcf0" cx="375" cy="424" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="kpoint" transform="translate(375 426)">{ strconv.Itoa(m.Points["kpoint"]) }</text>
+			<circle fill="#fffcf0" cx="461" cy="338" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="mpoint" transform="translate(461 338)">{ strconv.Itoa(m.Points["mpoint"]) }</text>
+			<circle fill="#74e0f8" cx="165.61" cy="297" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="spoint" transform="translate(165.61 299)">{ strconv.Itoa(m.Points["spoint"]) }</text>
+			<circle fill="#74e0f8" cx="333.7" cy="129" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="tpoint" transform="translate(333.7 131)">{ strconv.Itoa(m.Points["tpoint"]) }</text>
+			<circle fill="#3d54f5" cx="127.11" cy="297" r="24"></circle>
+			<text fill="#f5f5f5" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="opoint" transform="translate(127.11 299)">{ strconv.Itoa(m.Points["opoint"]) }</text>
+			<circle fill="#3d54f5" cx="333.7" cy="90.62" r="24"></circle>
+			<text fill="#f5f5f5" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="ppoint" transform="translate(333.7 92)">{ strconv.Itoa(m.Points["ppoint"]) }</text>
+			<circle fill="#fffcf0" cx="333" cy="505" r="24"></circle>
+			<text fill="#000000" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="rpoint" transform="translate(333 505)">{ strconv.Itoa(m.Points["rpoint"]) }</text>
+			<circle fill="#fffcf0" cx="538.5" cy="297" r="24"></circle>
+			<text fill="#000000" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="qpoint" transform="translate(538.5 299)">{ strconv.Itoa(m.Points["qpoint"]) }</text>
+			<circle fill="#b6fd57" cx="245.26" cy="297" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="wpoint" transform="translate(245.26 299)">{ strconv.Itoa(m.Points["wpoint"]) }</text>
+			<circle fill="#b6fd57" cx="333.7" cy="203" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="xpoint" transform="translate(333.7 204)">{ strconv.Itoa(m.Points["xpoint"]) }</text>
+			<circle fill="#fffcf0" cx="212" cy="175.93" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="f2point" transform="translate(212 179)">{ strconv.Itoa(m.Points["f2point"]) }</text>
+			<circle fill="#fffcf0" cx="184.71" cy="149.53" r="24"></circle>
+			<text fill="#000000" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="f1point" transform="translate(184.71 151)">{ strconv.Itoa(m.Points["f1point"]) }</text>
+			<circle fill="#fffcf0" cx="455.4" cy="177.53" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="g2point" transform="translate(455.4 179)">{ strconv.Itoa(m.Points["g2point"]) }</text>
+			<circle fill="#fffcf0" cx="480.79" cy="149.13" r="24"></circle>
+			<text fill="#000000" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="g1point" transform="translate(480.79 151)">{ strconv.Itoa(m.Points["g1point"]) }</text>
+			<circle fill="#fffcf0" cx="454.4" cy="416.91" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="i2point" transform="translate(454.4 416.91)">{ strconv.Itoa(m.Points["i2point"]) }</text>
+			<circle fill="#fffcf0" cx="479.79" cy="445.31" r="24"></circle>
+			<text fill="#000000" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="i1point" transform="translate(479.79 447)">{ strconv.Itoa(m.Points["i1point"]) }</text>
+			<circle fill="#fffcf0" cx="215" cy="419" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="h2point" transform="translate(215 419)">{ strconv.Itoa(m.Points["h2point"]) }</text>
+			<circle fill="#fffcf0" cx="188.71" cy="446.7" r="24"></circle>
+			<text fill="#000000" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="h1point" transform="translate(188.71 447)">{ strconv.Itoa(m.Points["h1point"]) }</text>
+			<circle fill="#fffcf0" cx="420.54" cy="297" r="21"></circle>
+			<text fill="#000000" font-size="17.2946px" text-anchor="middle" dominant-baseline="central" id="vpoint" transform="translate(420.54 299)">{ strconv.Itoa(m.Points["vpoint"]) }</text>
+			<circle fill="#fffcf0" cx="382" cy="297" r="24"></circle>
+			<text fill="#000000" font-size="21.1378px" text-anchor="middle" dominant-baseline="central" id="upoint" transform="translate(382 299)">{ strconv.Itoa(m.Points["upoint"]) }</text>
+		</g>
+		<g id="points-years">
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(20 295)">
+				0
+				<tspan x="-10" y="10">years</tspan>
+				<tspan x="-4" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(100 70)">
+				10
+				<tspan x="-8" y="10">years</tspan>
+				<tspan x="-2" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(330 -22)">
+				20
+				<tspan x="-8" y="10">years</tspan>
+				<tspan x="-2" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(550 70)">
+				30
+				<tspan x="-8" y="10">years</tspan>
+				<tspan x="-2" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(638 295)">
+				40
+				<tspan x="-8" y="10">years</tspan>
+				<tspan x="-2" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(550 515)">
+				50
+				<tspan x="-8" y="10">years</tspan>
+				<tspan x="-2" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(328 610)">
+				60
+				<tspan x="-8" y="10">years</tspan>
+				<tspan x="-2" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.9501px" transform="translate(100 515)">
+				70
+				<tspan x="-8" y="10">years</tspan>
+				<tspan x="-2" y="20">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(97.49 198.76)">
+				5
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="8.34" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="8.34" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(232.22 66.42)">
+				15
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="13.9" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="13.9" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(405.8 67.22)">
+				25
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(540.55 204.76)">
+				35
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(542.76 402.12)">
+				45
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(403.8 539.38)">
+				55
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(235.6 539.38)">
+				65
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="12.0251px" transform="translate(97.69 400.12)">
+				75
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="-6">years</tspan>
+				<tspan fill="#f5f5f5" font-size="7.76471px" x="14.9" y="0">old</tspan>
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(71.7 252.94)">
+				1-2,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(79.14 234.61)">
+				2,5-3,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(86.39 216.23)">
+				3,5-4
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(102.39 179.23)">
+				6-7,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(109.39 160.23)">
+				7,5-8,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(117.39 143.23)">
+				8,5-9
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(176.55 85.51)">
+				11-12,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(195.09 77.79)">
+				12,5-13,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(214.38 70.22)">
+				13,5-14
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(250.51 54.83)">
+				16-17,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(268.88 47.18)">
+				17,5-18,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(287.83 39.52)">
+				18,5-19
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(360 38.52)">
+				21-22,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(372.75 47.17)">
+				22,5-23,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(397.13 54.83)">
+				23,5-24
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(433.01 70.14)">
+				26-27,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(448.01 77.79)">
+				27,5-28,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(469.26 85.51)">
+				28,5-29
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(528.75 146.23)">
+				31-32,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(529.12 163.23)">
+				32,5-33,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(543.78 182.23)">
+				33,5-34
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(558.77 219.23)">
+				36-37,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(560.77 237.61)">
+				37,5-38,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(573.07 255.94)">
+				38,5-39
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(572.49 345.82)">
+				41-42,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(558.89 363.52)">
+				42,5-43,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(557.3 382.28)">
+				43,5-44
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(541.66 419.27)">
+				46-47,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(528.32 437.69)">
+				47,5-48,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(526.7 456.08)">
+				48,5-49
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(358.55 560.01)">
+				58,5-59
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(369.09 552.29)">
+				57,5-58,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(387.38 545.68)">
+				56-57,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(430.51 529.33)">
+				53,5-54
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(441.88 522.68)">
+				52,5-53,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(463.83 515.02)">
+				51-52,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(178 514.02)">
+				68,5-69
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(196.75 521.67)">
+				67,5-68,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(215.13 529.33)">
+				66-67,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(254.01 545.68)">
+				63,5-64
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(271.01 552.29)">
+				62,5-63,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(285.26 559.01)">
+				61-62,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(73.75 343.82)">
+				78,5-79
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(81.12 361.52)">
+				77,5-78,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(88.78 380.28)">
+				76-77,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(103.77 417.27)">
+				73,5-74
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(111.77 435.69)">
+				72,5-73,5
+			</text>
+			<text fill="#f5f5f5" font-size="8px" transform="translate(119.07 454.08)">
+				71-72,5
+			</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="af2point" transform="translate(52 246) rotate(-67.5)">{ strconv.Itoa(m.Years["af2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="af1point" transform="translate(60 227.5) rotate(-67.5)">{ strconv.Itoa(m.Years["af1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="af3point" transform="translate(68 209) rotate(-67.5)">{ strconv.Itoa(m.Years["af3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="afpoint" transform="translate(76 190.5) rotate(-67.5)">{ strconv.Itoa(m.Years["afpoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="af5point" transform="translate(82 172.5) rotate(-67.5)">{ strconv.Itoa(m.Years["af5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="af4point" transform="translate(90 154) rotate(-67.5)">{ strconv.Itoa(m.Years["af4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="af6point" transform="translate(98 135.5) rotate(-67.5)">{ strconv.Itoa(m.Years["af6point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="fb2point" transform="translate(169 63) rotate(-22.5)">{ strconv.Itoa(m.Years["fb2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="fb1point" transform="translate(188 55) rotate(-22.5)">{ strconv.Itoa(m.Years["fb1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="fb3point" transform="translate(206 47) rotate(-22.5)">{ strconv.Itoa(m.Years["fb3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="fbpoint" transform="translate(224 39) rotate(-22.5)">{ strconv.Itoa(m.Years["fbpoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="fb5point" transform="translate(243 31) rotate(-22.5)">{ strconv.Itoa(m.Years["fb5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="fb4point" transform="translate(261 23.5) rotate(-22.5)">{ strconv.Itoa(m.Years["fb4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="fb6point" transform="translate(280 16) rotate(-22.5)">{ strconv.Itoa(m.Years["fb6point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="bg2point" transform="translate(388 16) rotate(22.5)">{ strconv.Itoa(m.Years["bg2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="bg1point" transform="translate(407 24) rotate(22.5)">{ strconv.Itoa(m.Years["bg1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="bg3point" transform="translate(426 32) rotate(22.5)">{ strconv.Itoa(m.Years["bg3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="bgpoint" transform="translate(444 40) rotate(22.5)">{ strconv.Itoa(m.Years["bgpoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="bg5point" transform="translate(463 48) rotate(22.5)">{ strconv.Itoa(m.Years["bg5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="bg4point" transform="translate(481 55) rotate(22.5)">{ strconv.Itoa(m.Years["bg4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="bg6point" transform="translate(500 63) rotate(22.5)">{ strconv.Itoa(m.Years["bg6point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="gc2point" transform="translate(570 135) rotate(67.5)">{ strconv.Itoa(m.Years["gc2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="gc1point" transform="translate(578 153.5) rotate(67.5)">{ strconv.Itoa(m.Years["gc1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="gc3point" transform="translate(586 172) rotate(67.5)">{ strconv.Itoa(m.Years["gc3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="gcpoint" transform="translate(594 190.5) rotate(67.5)">{ strconv.Itoa(m.Years["gcpoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="gc5point" transform="translate(602 209) rotate(67.5)">{ strconv.Itoa(m.Years["gc5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="gc4point" transform="translate(610 227.5) rotate(67.5)">{ strconv.Itoa(m.Years["gc4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="gc6point" transform="translate(618 246) rotate(67.5)">{ strconv.Itoa(m.Years["gc6point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ci2point" transform="translate(615 348) rotate(-67.5)">{ strconv.Itoa(m.Years["ci2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ci1point" transform="translate(607 367) rotate(-67.5)">{ strconv.Itoa(m.Years["ci1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ci3point" transform="translate(599 385.5) rotate(-67.5)">{ strconv.Itoa(m.Years["ci3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="cipoint" transform="translate(591 404) rotate(-67.5)">{ strconv.Itoa(m.Years["cipoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ci5point" transform="translate(583 422.5) rotate(-67.5)">{ strconv.Itoa(m.Years["ci5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ci4point" transform="translate(575 441) rotate(-67.5)">{ strconv.Itoa(m.Years["ci4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ci6point" transform="translate(567 459.5) rotate(-67.5)">{ strconv.Itoa(m.Years["ci6point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="id2point" transform="translate(496 532) rotate(-22.5)">{ strconv.Itoa(m.Years["id2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="id1point" transform="translate(477.5 540) rotate(-22.5)">{ strconv.Itoa(m.Years["id1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="id3point" transform="translate(459.5 548) rotate(-22.5)">{ strconv.Itoa(m.Years["id3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="idpoint" transform="translate(441 555.5) rotate(-22.5)">{ strconv.Itoa(m.Years["idpoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="id5point" transform="translate(422.5 563) rotate(-22.5)">{ strconv.Itoa(m.Years["id5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="id4point" transform="translate(404 571) rotate(-22.5)">{ strconv.Itoa(m.Years["id4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="id6point" transform="translate(385 578.5) rotate(-22.5)">{ strconv.Itoa(m.Years["id6point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="dh2point" transform="translate(282 578.5) rotate(22.5)">{ strconv.Itoa(m.Years["dh2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="dh1point" transform="translate(263.5 571) rotate(22.5)">{ strconv.Itoa(m.Years["dh1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="dh3point" transform="translate(244.5 563) rotate(22.5)">{ strconv.Itoa(m.Years["dh3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="dhpoint" transform="translate(226 555.5) rotate(22.5)">{ strconv.Itoa(m.Years["dhpoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="dh5point" transform="translate(207 548) rotate(22.5)">{ strconv.Itoa(m.Years["dh5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="dh4point" transform="translate(188.5 540) rotate(22.5)">{ strconv.Itoa(m.Years["dh4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="dh6point" transform="translate(170 532) rotate(22.5)">{ strconv.Itoa(m.Years["dh6point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ha2point" transform="translate(97 459) rotate(67.5)">{ strconv.Itoa(m.Years["ha2point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ha1point" transform="translate(89 441) rotate(67.5)">{ strconv.Itoa(m.Years["ha1point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ha3point" transform="translate(81 423) rotate(67.5)">{ strconv.Itoa(m.Years["ha3point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="hapoint" transform="translate(73 405) rotate(67.5)">{ strconv.Itoa(m.Years["hapoint"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ha5point" transform="translate(65 386.5) rotate(67.5)">{ strconv.Itoa(m.Years["ha5point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ha4point" transform="translate(57 368) rotate(67.5)">{ strconv.Itoa(m.Years["ha4point"]) }</text>
+			<text fill="#f5f5f5" font-size="12px" text-anchor="middle" dominant-baseline="central" id="ha6point" transform="translate(49 349.5) rotate(67.5)">{ strconv.Itoa(m.Years["ha6point"]) }</text>
+		</g>
+	</svg>
+}

@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+/* Only the templates use utility classes. */
+@source "../../templates";
+
+/* Colors from assets/constatns/theme.ts, fonts from app/_layout.tsx. */
+@theme {
+  --color-primary: #bd9c49;
+  --color-secondary: #ed4fe3;
+  --color-background: #231d32;
+  --color-backdrop: #0e1429;
+  --color-surface: #1a1a1a;
+  --color-surface-light: #2a2a2a;
+  --color-muted: #9ca3af;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-javassoul: "Javassoul", "EB Garamond", serif;
+  --font-garamond: "EB Garamond", Garamond, Georgia, serif;
+  --font-garamond-sc: "AGaramond SC", "EB Garamond", Garamond, Georgia, serif;
+}
+
+@font-face {
+  font-family: "Javassoul";
+  src: url("../fonts/javassoul.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond";
+  src: url("../fonts/ebgaramond-regular.woff2") format("woff2");
+  font-display: swap;
+}
+@font-face {
+  font-family: "AGaramond SC";
+  src: url("../fonts/agaramond-sc.woff2") format("woff2");
+  font-display: swap;
+}
+
+@layer base {
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer components {
+  /* HTMX loading indicator (htmx's inline styles are disabled for the CSP). */
+  .htmx-indicator {
+    display: none;
+  }
+  .htmx-request .htmx-indicator,
+  .htmx-request.htmx-indicator {
+    display: inline-block;
+  }
+  .spinner {
+    width: 1em;
+    height: 1em;
+    border: 2px solid rgb(0 0 0 / 0.25);
+    border-top-color: #000;
+    border-radius: 9999px;
+    animation: spin 0.8s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation-duration: 2.4s;
+    }
+  }
+
+  /* Chakra badges of the Matrix Destiny table. */
+  .chakra-7 { background: #b653f7; color: #fff; }
+  .chakra-6 { background: #3d54f5; color: #fff; }
+  .chakra-5 { background: #74e0f8; color: #000; }
+  .chakra-4 { background: #b6fd57; color: #000; }
+  .chakra-3 { background: #fbe49d; color: #000; }
+  .chakra-2 { background: #ed7233; color: #fff; }
+  .chakra-1 { background: #ea4631; color: #fff; }
+
+  /* The result sheet slides up, like the source's animationType="slide". */
+  .result-sheet {
+    animation: sheet-in 0.25s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .result-sheet {
+      animation: none;
+    }
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+body.sheet-open {
+  overflow: hidden;
+}

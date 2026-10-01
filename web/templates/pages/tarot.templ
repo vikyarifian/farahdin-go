@@ -1,0 +1,159 @@
+package pages
+
+import (
+	"strconv"
+
+	"github.com/vikyarifian/farahdin-go/internal/i18n"
+	"github.com/vikyarifian/farahdin-go/internal/service"
+	"github.com/vikyarifian/farahdin-go/web"
+	"github.com/vikyarifian/farahdin-go/web/templates/components"
+	"github.com/vikyarifian/farahdin-go/web/templates/layouts"
+)
+
+// Tarot ports the card spread of app/pages/tarot.tsx. Cards are radio
+// buttons (checkboxes for True Love) so picking works without JavaScript;
+// the raised selected card is pure CSS.
+templ Tarot(v TarotView) {
+	@layouts.Feature("Tarot", "/tarot", layouts.TabHome) {
+		@components.FeatureHero("images/icon/tarot-icon-header.png", v.Topic.Label(i18n.Lang(ctx)))
+		<form
+			method="post"
+			if v.Topic.Key == 2 {
+				action={ templ.SafeURL("/tarot/2/read") }
+				hx-post="/tarot/2/read"
+			} else {
+				action={ templ.SafeURL("/tarot/" + strconv.Itoa(v.Topic.Key) + "/pick") }
+				hx-post={ "/tarot/" + strconv.Itoa(v.Topic.Key) + "/pick" }
+			}
+			hx-target="#result"
+			hx-swap="innerHTML"
+			hx-disabled-elt="find button[type=submit]"
+			hx-indicator="find button[type=submit]"
+			class="flex flex-col items-center"
+		>
+			if v.Topic.Key == 2 {
+				<fieldset class="flex justify-center gap-4 px-5 pt-5">
+					<legend class="sr-only">{ i18n.T(ctx, "Pilih kartumu dan kartu pasangan", "Pick your card and your partner's card") }</legend>
+					@trueLoveCard("you", v.Cards[0], "your-card.png", "Your Card")
+					@trueLoveCard("partner", v.Cards[1], "partner-card.png", "Partner's Card")
+				</fieldset>
+			} else {
+				<fieldset class="w-full">
+					<legend class="sr-only">{ i18n.T(ctx, "Pilih satu kartu", "Pick one card") }</legend>
+					<ul class="flex flex-wrap justify-center pl-5 pr-[54px] pt-10">
+						for i, c := range v.Cards {
+							<li class="-ml-px w-[7.36%] min-h-[100px]">
+								<label class="block cursor-pointer">
+									<input type="radio" name="card" value={ strconv.Itoa(c) } required class="peer sr-only"/>
+									<img src={ web.Asset("images/tarot/tarot.png") } alt="" class="h-[100px] w-[60px] max-w-none rounded object-contain transition-transform duration-150 peer-checked:-translate-y-[30px] peer-focus-visible:outline-2 peer-focus-visible:outline-primary"/>
+									<span class="sr-only">{ i18n.T(ctx, "Kartu", "Card") } { strconv.Itoa(i + 1) }</span>
+								</label>
+							</li>
+						}
+					</ul>
+				</fieldset>
+			}
+			if v.Error != "" {
+				<div class="px-4">
+					@components.Alert(v.Error)
+				</div>
+			}
+			<div class="mt-8">
+				if v.Topic.Key == 2 {
+					@components.SubmitButton(i18n.T(ctx, "Baca", "Read"))
+				} else {
+					@components.SubmitButton(i18n.T(ctx, "Pilih", "Pick"))
+				}
+			</div>
+		</form>
+		<div id="result" aria-live="polite">
+			if v.Sheet != nil {
+				@TarotResult(*v.Sheet)
+			}
+		</div>
+	}
+}
+
+templ trueLoveCard(name string, card int, placeholder string, label string) {
+	<label class="flex cursor-pointer flex-col items-center">
+		<input type="checkbox" name={ name } value={ strconv.Itoa(card) } required class="peer sr-only"/>
+		<img src={ web.Asset("images/tarot/" + placeholder) } alt="" class="h-[180px] w-auto rounded peer-checked:hidden peer-focus-visible:outline-2 peer-focus-visible:outline-primary"/>
+		<img src={ service.TarotCardImage(card) } alt="" class="hidden h-[180px] w-auto rounded peer-checked:block peer-focus-visible:outline-2 peer-focus-visible:outline-primary"/>
+		<span class="sr-only">{ label }</span>
+	</label>
+}
+
+// TarotResult ports the tarot <Result> sheet. True Love errors (missing
+// cards or a failed reading) are shown under the spread instead.
+templ TarotResult(s TarotSheet) {
+	if s.Topic.Key == 2 && s.Error != "" {
+		@components.Alert(s.Error)
+	} else {
+		@components.ResultSheetReload("Tarot", s.Topic.Label(i18n.Lang(ctx)), "/tarot/"+strconv.Itoa(s.Topic.Key)) {
+			@TarotReading(s)
+		}
+	}
+}
+
+// TarotReading is the body of the sheet; "Read Card" replaces it in place.
+templ TarotReading(s TarotSheet) {
+	<div id="tarot-reading">
+		<div class="mx-2.5 mb-10 flex justify-center gap-4 pt-5">
+			switch s.Topic.Key {
+				case 1:
+					@tarotImage(service.TarotCardImage(s.Card), "w-[88%]")
+				case 2:
+					<figure class="flex flex-col items-center">
+						@pairImage(service.TarotCardImage(s.You))
+						<figcaption class="p-1 text-base text-primary">Your Card</figcaption>
+					</figure>
+					<figure class="flex flex-col items-center">
+						@pairImage(service.TarotCardImage(s.Partner))
+						<figcaption class="p-1 text-base text-primary">Partner's Card</figcaption>
+					</figure>
+				default:
+					// Angel / Past Lives: after reading, card and illustration sit side by side.
+					if s.Read {
+						<div class="flex w-full items-start justify-center gap-3">
+							@pairImage(service.TarotCardImage(s.Card))
+							@pairImage(service.TarotExtraImage(s.Topic.Key, s.Card))
+						</div>
+					} else {
+						@tarotImage(service.TarotExtraImage(s.Topic.Key, s.Card), "w-[88%]")
+					}
+			}
+		</div>
+		if s.Read {
+			@components.Lines(s.Reading.Lines)
+		} else {
+			if s.Error != "" {
+				@components.Alert(s.Error)
+			}
+			<form
+				method="post"
+				action={ templ.SafeURL("/tarot/" + strconv.Itoa(s.Topic.Key) + "/read") }
+				hx-post={ "/tarot/" + strconv.Itoa(s.Topic.Key) + "/read" }
+				hx-target="#tarot-reading"
+				hx-swap="outerHTML"
+				hx-disabled-elt="find button[type=submit]"
+				hx-indicator="find button[type=submit]"
+				class="flex justify-center"
+			>
+				<input type="hidden" name="card" value={ strconv.Itoa(s.Card) }/>
+				<input type="hidden" name="sheet" value="1"/>
+				@components.SubmitButton(i18n.T(ctx, "Baca Kartu", "Read Card"))
+			</form>
+		}
+	</div>
+}
+
+// pairImage is one of two images shown side by side. The card images differ
+// in height (377–412px at 256px wide), so a pair shares one height and each
+// keeps its own width; the frames line up without stretching.
+templ pairImage(src string) {
+	<img src={ src } alt="" class="h-[min(58vw,20rem)] w-auto"/>
+}
+
+templ tarotImage(src string, class string) {
+	<img src={ src } alt="" class={ "mx-auto min-h-[160px] object-contain", class }/>
+}

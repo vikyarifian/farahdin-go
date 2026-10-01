@@ -1,0 +1,147 @@
+package pages
+
+import (
+	"strconv"
+
+	"github.com/vikyarifian/farahdin-go/internal/domain"
+	"github.com/vikyarifian/farahdin-go/internal/i18n"
+	"github.com/vikyarifian/farahdin-go/internal/service"
+	"github.com/vikyarifian/farahdin-go/web/templates/components"
+	"github.com/vikyarifian/farahdin-go/web/templates/layouts"
+)
+
+// Matrix ports the Matrix Destiny form (only the Personal topic is reachable).
+templ Matrix(v MatrixView) {
+	@layouts.Feature(i18n.T(ctx, "Matriks Takdir", "Matrix Destiny"), "/", layouts.TabHome) {
+		@components.FeatureHero("images/icon/matrix-destiny-icon-header.png", v.Topic.Label(i18n.Lang(ctx)))
+		@readingForm("/matrix-destiny") {
+			@components.Field("name", i18n.T(ctx, "Nama", "Name"), "") {
+				@components.TextInput("name", "name", v.Name, i18n.T(ctx, "Masukan Nama", "Input Name"), templ.Attributes{"required": true, "maxlength": "100"})
+			}
+			@components.Field("birthday", i18n.T(ctx, "Tanggal Lahir", "Birthdate"), "") {
+				@components.DateInput("birthday", "birthday", v.Birthday, v.Today, nil)
+			}
+			@components.SubmitButton(i18n.T(ctx, "Mulai", "Generate"))
+		}
+		<div id="result" aria-live="polite">
+			@MatrixResult(v)
+		</div>
+	}
+}
+
+// MatrixResult renders the validation error or the result sheet.
+templ MatrixResult(v MatrixView) {
+	if v.Error != "" {
+		@components.Alert(v.Error)
+	} else if v.Result != nil {
+		@components.ResultSheet(i18n.T(ctx, "Matriks Takdir", "Matrix Destiny"), v.Topic.Label(i18n.Lang(ctx)), "/matrix-destiny") {
+			@matrixBody(*v.Result)
+		}
+	}
+}
+
+templ matrixBody(r service.MatrixResult) {
+	<p class="self-center p-1 text-center text-sm">
+		{ r.Name }
+		<span class="text-muted">{ i18n.T(ctx, "Tanggal Lahir: ", "Date of Birth: ") }</span>
+		{ r.Birthday.Format("02.01.2006") }
+	</p>
+	<div class="my-2">
+		@MatrixChart(r.Matrix, i18n.T(ctx, "Diagram matriks takdir", "Destiny matrix chart"))
+	</div>
+	@chakraTable(r.Matrix)
+	@purposeBlock(i18n.T(ctx, "Tujuan pribadi", "Personal purpose"),
+		i18n.T(ctx, "Pencarian jiwa, keseimbangan kualitas feminin dan maskulin, kemampuan dan keterampilan ", "Soul searching, balance of feminine and masculine qualities, abilities, skills"),
+		i18n.T(ctx, "Langit", "Sky"), r.Matrix.Purposes["skypoint"],
+		i18n.T(ctx, "Bumi", "Earth"), r.Matrix.Purposes["earthpoint"],
+		r.Matrix.Purposes["perspurpose"])
+	@purposeBlock(i18n.T(ctx, "Tujuan untuk masyarakat", "Purpose for society"),
+		i18n.T(ctx, "Tugas leluhur, hasil dan pengakuan dalam masyarakat", "Ancestors tasks, results and recognition in society"),
+		"M", r.Matrix.Purposes["malepoint"],
+		"F", r.Matrix.Purposes["femalepoint"],
+		r.Matrix.Purposes["socialpurpose"])
+	<section class="mt-6">
+		<h3 class="font-garamond text-[22px] font-bold">{ i18n.T(ctx, "Tujuan untuk Hidup Ini", "General purpose for this lifetime") } :</h3>
+		<p class="p-1 text-sm">{ i18n.T(ctx, "Jalan spiritual, tugas global, di manakah sisi ilahi dalam diriku?", "Spiritual path, global task, where is the divine in me?") }</p>
+		<div class="p-2.5">
+			@circle(r.Matrix.Purposes["generalpurpose"])
+		</div>
+		<h3 class="mt-6 font-garamond text-[22px] font-bold">{ i18n.T(ctx, "Tujuan planet", "Planetary purpose") } :</h3>
+		<p class="p-1 text-sm">{ i18n.T(ctx, "Tujuan jiwa global", "Global soul purpose") }</p>
+		<div class="p-2.5">
+			@circle(r.Matrix.Purposes["planetarypurpose"])
+		</div>
+	</section>
+	if len(r.Reading.Lines) > 0 {
+		<section class="mt-9">
+			<h3 class="font-garamond text-[22px] font-bold">{ i18n.T(ctx, "Pembacaan Matriks", "Matrix Reading") } :</h3>
+			@components.Lines(r.Reading.Lines)
+		</section>
+	}
+	@components.Notice(r.Reading.Notice)
+}
+
+templ chakraTable(m domain.Matrix) {
+	<table class="mt-2 w-full border-separate border-spacing-0 overflow-hidden rounded-[10px] border border-muted text-sm">
+		<thead>
+			<tr>
+				<th scope="col" class="p-2 text-left font-normal">{ i18n.T(ctx, "Cakra", "Chakra") }</th>
+				<th scope="col" class="p-2 text-right font-normal">{ i18n.T(ctx, "Fisika", "Physics") }</th>
+				<th scope="col" class="p-2 text-right font-normal">{ i18n.T(ctx, "Energi", "Energy") }</th>
+				<th scope="col" class="p-2 text-right font-normal">{ i18n.T(ctx, "Emosi", "Emotions") }</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, c := range m.Chakras {
+				<tr>
+					<th scope="row" class="border-t border-muted p-2 text-left font-normal">
+						<span class="flex items-center gap-1.5">
+							<span class={ "chakra-dot inline-flex size-6 items-center justify-center rounded-full", "chakra-" + strconv.Itoa(c.Number) }>{ strconv.Itoa(c.Number) }</span>
+							{ c.Name }
+						</span>
+					</th>
+					<td class="border-t border-muted p-2 text-right">{ strconv.Itoa(c.Physics) }</td>
+					<td class="border-t border-muted p-2 text-right">{ strconv.Itoa(c.Energy) }</td>
+					<td class="border-t border-muted p-2 text-right">{ strconv.Itoa(c.Emotions) }</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+	<table class="mt-2.5 w-full rounded-[10px] border border-muted text-sm">
+		<tbody>
+			<tr>
+				<th scope="row" class="p-3 text-left font-normal">{ i18n.T(ctx, "Hasil", "Result") }</th>
+				<td class="p-3 text-right">{ strconv.Itoa(m.TotalPhysics) }</td>
+				<td class="p-3 text-right">{ strconv.Itoa(m.TotalEnergy) }</td>
+				<td class="p-3 text-right">{ strconv.Itoa(m.TotalEmotions) }</td>
+			</tr>
+		</tbody>
+	</table>
+}
+
+// purposeBlock shows two inputs joined by a bracket into a result, as in the source.
+templ purposeBlock(title string, desc string, topLabel string, top int, bottomLabel string, bottom int, result int) {
+	<section class="mt-6">
+		<h3 class="font-garamond text-[22px] font-bold">{ title } :</h3>
+		<p class="p-1 text-sm">{ desc }</p>
+		<div class="mt-2 flex items-center gap-2">
+			<div class="flex flex-col gap-6">
+				<p class="flex items-center gap-2 text-sm">
+					<span class="w-14">{ topLabel } :</span>@circle(top)
+				</p>
+				<p class="flex items-center gap-2 text-sm">
+					<span class="w-14">{ bottomLabel } :</span>@circle(bottom)
+				</p>
+			</div>
+			<svg width="45" height="61" viewBox="0 0 45 61" fill="none" aria-hidden="true">
+				<path d="M0.422852 1.06299H21.6661V60.0719H0.422852" stroke="#F9F9F8" stroke-width="1.18018"></path>
+				<path d="M44.68 30.5674H21.6665" stroke="#F9F9F8" stroke-width="1.18018"></path>
+			</svg>
+			@circle(result)
+		</div>
+	</section>
+}
+
+templ circle(n int) {
+	<span class="inline-flex size-[30px] items-center justify-center rounded-full border border-white text-sm">{ strconv.Itoa(n) }</span>
+}

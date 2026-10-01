@@ -1,0 +1,329 @@
+package pages
+
+import (
+	"context"
+
+	"github.com/vikyarifian/farahdin-go/internal/i18n"
+	"github.com/vikyarifian/farahdin-go/web"
+	"github.com/vikyarifian/farahdin-go/web/templates/components"
+	"github.com/vikyarifian/farahdin-go/web/templates/layouts"
+)
+
+// Login ports app/(auth)/login.tsx.
+templ Login(v LoginView) {
+	@layouts.Base("Farahdin") {
+		<main id="main" class="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 pb-16">
+			<h1 class="mb-16 font-javassoul text-[60px] tracking-wide text-primary">Farahdin</h1>
+			if v.Error != "" {
+				<div class="mb-4 w-full max-w-[250px]">
+					@components.Alert(v.Error)
+				</div>
+			}
+			if v.GoogleEnabled {
+				<a href="/auth/google/start" class="mb-4 flex h-[50px] w-full max-w-[250px] items-center justify-center gap-3 rounded-[14px] bg-white px-6 font-semibold text-surface shadow-lg transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+					@googleLogo()
+					{ i18n.T(ctx, "Lanjut pakai Google", "Continue with Google") }
+				</a>
+			} else {
+				<p class="mb-4 max-w-[250px] text-center text-sm text-muted">
+					{ i18n.T(ctx, "Login Google belum dikonfigurasi (GOOGLE_CLIENT_ID).", "Google sign-in is not configured (GOOGLE_CLIENT_ID).") }
+				</p>
+			}
+			<p class="max-w-[220px] text-center text-xs text-muted">
+				{ i18n.T(ctx, "Dengan lanjut, kamu setuju dengan Syarat dan Kebijakan Privasi kami", "By continuing, you agree to our Terms and Privacy Policy") }
+			</p>
+			if v.DevLogin {
+				<form method="post" action="/auth/dev" class="mt-10 w-full max-w-[250px] rounded-lg border border-dashed border-muted p-3">
+					<label for="dev-email" class="block text-xs text-muted">Development sign-in (DEV_LOGIN)</label>
+					<input id="dev-email" name="email" type="email" required value="dev@example.com" class="mt-1 h-10 w-full rounded border border-muted bg-transparent px-2 text-sm"/>
+					<button type="submit" class="mt-2 w-full rounded bg-surface-light py-2 text-sm">Sign in as this email</button>
+				</form>
+			}
+		</main>
+	}
+}
+
+templ googleLogo() {
+	<svg class="size-6" viewBox="0 0 48 48" aria-hidden="true">
+		<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+		<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+		<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+		<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+	</svg>
+}
+
+// greeting ports getGreetingTime().
+func greeting(ctx context.Context, hour int) string {
+	switch {
+	case hour >= 5 && hour < 12:
+		return i18n.T(ctx, "Selamat pagi", "Good morning")
+	case hour >= 12 && hour < 17:
+		return i18n.T(ctx, "Selamat siang", "Good afternoon")
+	case hour >= 17 && hour < 21:
+		return i18n.T(ctx, "Selamat sore", "Good evening")
+	}
+	return i18n.T(ctx, "Selamat malam", "Good night")
+}
+
+type featureCard struct {
+	href, icon, titleID, titleEN, descID, descEN string
+}
+
+var featureCards = []featureCard{
+	{"/primbon", "images/icon/primbon-icon.png", "Primbon", "Primbon",
+		"Hitung weton, karakter, perjodohan dan peruntungan", "Calculate weton, character, compatibility and fortune"},
+	{"/horoscope", "images/icon/horoscope-icon.png", "Horoskop", "Horoscope",
+		"Temukan ramalan zodiak harian dan kompabilitas kamu", "Find your daily zodiac predictions and compatibility"},
+	{"/tarot", "images/icon/tarot-icon.png", "Tarot", "Tarot",
+		"Tarik kartu untuk mendapatkan petunjuk dari semesta", "Pull cards to get clues from the universe"},
+	{"/clairvoyance", "images/icon/clair-icon.png", "Kewaskitaan", "Clairvoyance",
+		"Buka bacaan batin dan pesan dari energi gaib", "Open inner readings and messages from supernatural energies"},
+	{"/matrix-destiny", "images/icon/matrix-destiny-icon.png", "Matriks Takdir", "Matrix Destiny",
+		"Ungkap pola kehidupan, bakat dan tantangan melalui simbol angka", "Reveal life patterns, talents and challenges through number symbols"},
+}
+
+// Home ports app/(tabs)/index.tsx.
+templ Home(v HomeView) {
+	@layouts.App("Farahdin", layouts.TabHome) {
+		<div class="flex items-center justify-between gap-3 px-2 pb-3 pt-4">
+			<p class="font-garamond text-2xl font-bold leading-tight">
+				<span
+					data-greeting
+					data-morning={ i18n.T(ctx, "Selamat pagi", "Good morning") }
+					data-afternoon={ i18n.T(ctx, "Selamat siang", "Good afternoon") }
+					data-evening={ i18n.T(ctx, "Selamat sore", "Good evening") }
+					data-night={ i18n.T(ctx, "Selamat malam", "Good night") }
+				>{ greeting(ctx, v.Hour) }</span>, { v.FirstName }
+			</p>
+			<details class="relative" data-dropdown>
+				<summary class="flex min-h-11 cursor-pointer list-none items-center rounded-md px-2 focus-visible:outline-2 focus-visible:outline-primary" aria-label={ i18n.T(ctx, "Ganti bahasa", "Change language") }>
+					@components.LanguageOption(i18n.Lang(ctx))
+				</summary>
+				<form method="post" action="/settings/language" class="absolute right-0 top-12 z-20 rounded-md bg-surface p-1 shadow-lg">
+					<input type="hidden" name="next" value="/"/>
+					if i18n.IsID(ctx) {
+						<button type="submit" name="lang" value="EN" class="flex min-h-11 items-center rounded px-3 hover:bg-white/10">
+							@components.LanguageOption("EN")
+						</button>
+					} else {
+						<button type="submit" name="lang" value="ID" class="flex min-h-11 items-center rounded px-3 hover:bg-white/10">
+							@components.LanguageOption("ID")
+						</button>
+					}
+				</form>
+			</details>
+		</div>
+		<div class="relative flex aspect-[512/341] w-full items-end justify-center overflow-hidden rounded-lg">
+			<img src={ web.Asset("images/hero.png") } alt="" width="512" height="341" fetchpriority="high" class="absolute inset-0 size-full object-contain opacity-95"/>
+			<p class="relative font-javassoul text-[60px] leading-tight text-primary" aria-hidden="true">Farahdin</p>
+		</div>
+		<ul class="mt-12 flex flex-col items-center gap-5 pb-6">
+			for _, c := range featureCards {
+				<li class="w-[90%]">
+					<a href={ templ.SafeURL(c.href) } class="flex min-h-[100px] items-center gap-4 rounded-2xl border border-primary bg-backdrop py-2.5 pl-5 pr-3 transition hover:bg-backdrop/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+						<img src={ web.Asset(c.icon) } alt="" class="size-[65px] shrink-0 rounded-2xl"/>
+						<span class="flex flex-col">
+							<span class="font-garamond-sc text-[26px] font-semibold leading-tight">{ i18n.T(ctx, c.titleID, c.titleEN) }</span>
+							<span class="font-garamond text-lg leading-snug">{ i18n.T(ctx, c.descID, c.descEN) }</span>
+						</span>
+					</a>
+				</li>
+			}
+		</ul>
+	}
+}
+
+// Profile ports app/(tabs)/profile.tsx.
+templ Profile(v ProfileView) {
+	@layouts.App(i18n.T(ctx, "Profil", "Profile")+" · Farahdin", layouts.TabProfile) {
+		@components.Header(i18n.T(ctx, "Profil", "Profile"), "/")
+		<div class="flex items-start gap-3 p-4 pt-8">
+			if v.User.ImageURL != "" {
+				<img src={ v.User.ImageURL } alt="" referrerpolicy="no-referrer" class="size-[75px] rounded-full object-cover"/>
+			} else {
+				<span class="flex size-[75px] items-center justify-center rounded-full bg-surface-light text-muted">
+					@components.Icon("person", "size-10")
+				</span>
+			}
+			<div class="flex flex-col gap-1 p-3">
+				<p class="text-lg">{ profileTitle(v) }</p>
+				<p class="text-base">{ profileSubtitle(v) }</p>
+			</div>
+		</div>
+		<ul class="mt-6 flex flex-col px-4">
+			<li>
+				<a href="/profile/edit" class="flex min-h-12 items-center gap-2 text-base focus-visible:outline-2 focus-visible:outline-primary">
+					@components.Icon("person", "size-6 text-primary")
+					{ i18n.T(ctx, "Ubah Profil", "Edit Profile") }
+				</a>
+				@components.Divider()
+			</li>
+			<li>
+				<a href="/settings" class="flex min-h-12 items-center gap-2 text-base focus-visible:outline-2 focus-visible:outline-primary">
+					@components.Icon("settings", "size-6 text-primary")
+					{ i18n.T(ctx, "Pengaturan", "Settings") }
+				</a>
+				@components.Divider()
+			</li>
+			<li>
+				<form method="post" action="/logout">
+					<button type="submit" class="flex min-h-12 w-full items-center gap-2 text-base focus-visible:outline-2 focus-visible:outline-primary">
+						@components.Icon("log-out", "size-6 text-primary")
+						{ i18n.T(ctx, "Keluar", "Sign out") }
+					</button>
+				</form>
+			</li>
+		</ul>
+	}
+}
+
+// profileTitle ports "{fullname || 'Guest'}, {age}".
+func profileTitle(v ProfileView) string {
+	name := v.User.Fullname
+	if name == "" {
+		name = "Guest"
+	}
+	if v.Age != "" {
+		return name + ", " + v.Age
+	}
+	return name
+}
+
+// profileSubtitle ports "{gender + ', '} {zodiac}".
+func profileSubtitle(v ProfileView) string {
+	if v.User.Gender != "" {
+		return v.User.Gender + ", " + v.User.Zodiac
+	}
+	return v.User.Zodiac
+}
+
+// EditProfile ports app/pages/edit-profile.tsx.
+templ EditProfile(v EditProfileView) {
+	@layouts.Feature(i18n.T(ctx, "Ubah Profil", "Edit Profile"), "/profile", layouts.TabProfile) {
+		@EditProfileForm(v)
+	}
+}
+
+// EditProfileForm is swapped in place after saving.
+templ EditProfileForm(v EditProfileView) {
+	<form id="profile-form" method="post" action="/profile" hx-post="/profile" hx-target="this" hx-swap="outerHTML" hx-disabled-elt="find button[type=submit]" class="p-4" novalidate>
+		if v.Saved {
+			<p role="status" class="mb-3 rounded-lg border border-primary/60 bg-primary/10 p-3 text-sm text-primary">{ i18n.T(ctx, "Berhasil disimpan", "Success") }</p>
+		}
+		@components.Field("email", "Email", "") {
+			@components.TextInput("email", "", v.Email, "", templ.Attributes{"readonly": true})
+		}
+		@components.Field("name", i18n.T(ctx, "Nama", "Name"), v.Errors["name"]) {
+			@components.TextInput("name", "name", v.Name, i18n.T(ctx, "Masukan Nama", "Input Name"), templ.Attributes{"maxlength": "100", "autocomplete": "name"})
+		}
+		@components.Field("birthday", i18n.T(ctx, "Tanggal Lahir", "Birthdate"), v.Errors["birthday"]) {
+			@components.DateInput("birthday", "birthday", v.Birthday, v.Today, templ.Attributes{
+				"hx-get": "/profile/zodiac", "hx-trigger": "change", "hx-target": "#zodiac", "hx-swap": "outerHTML",
+			})
+		}
+		@components.Field("zodiac", i18n.T(ctx, "Zodiak", "Zodiac"), "") {
+			@ZodiacField(v.Zodiac)
+		}
+		@components.Field("birthplace", i18n.T(ctx, "Alamat", "Location"), v.Errors["birthplace"]) {
+			@components.TextInput("birthplace", "birthplace", v.Birthplace, i18n.T(ctx, "Masukan Alamat", "Input Location"), templ.Attributes{"maxlength": "200"})
+		}
+		<fieldset class="mb-2.5">
+			<legend class="p-1 text-lg font-bold text-primary">{ i18n.T(ctx, "Jenis Kelamin", "Gender") }</legend>
+			<div class="flex gap-6 p-1">
+				for _, g := range []string{"Male", "Female"} {
+					<label class="flex min-h-11 cursor-pointer items-center gap-2">
+						<input type="radio" name="gender" value={ g } checked?={ v.Gender == g } class="size-5 accent-primary"/>
+						{ g }
+					</label>
+				}
+			</div>
+			if v.Errors["gender"] != "" {
+				<p class="mt-1 text-sm text-red-400">{ v.Errors["gender"] }</p>
+			}
+		</fieldset>
+		@components.SubmitButton(i18n.T(ctx, "Simpan", "Save"))
+	</form>
+}
+
+// ZodiacField is the read-only zodiac input, refreshed when the birthday changes.
+templ ZodiacField(sign string) {
+	<input id="zodiac" type="text" value={ sign } readonly placeholder={ i18n.T(ctx, "Zodiak", "Zodiac") } class="h-11 w-full rounded-md border border-[#ccc] bg-transparent px-2.5 text-lg text-muted"/>
+}
+
+// Settings ports app/pages/settings.tsx.
+templ Settings() {
+	@layouts.Feature(i18n.T(ctx, "Pengaturan", "Settings"), "/profile", layouts.TabProfile) {
+		<form method="post" action="/settings/language" hx-post="/settings/language" hx-trigger="change" class="p-4">
+			<input type="hidden" name="next" value="/settings"/>
+			<fieldset>
+				<legend class="p-1 text-lg font-bold text-primary">{ i18n.T(ctx, "Bahasa", "Language") }</legend>
+				<div class="flex gap-6 p-1">
+					<label class="flex min-h-11 cursor-pointer items-center gap-2">
+						<input type="radio" name="lang" value="ID" checked?={ i18n.IsID(ctx) } class="size-5 accent-primary"/>
+						Indonesia
+					</label>
+					<label class="flex min-h-11 cursor-pointer items-center gap-2">
+						<input type="radio" name="lang" value="EN" checked?={ !i18n.IsID(ctx) } class="size-5 accent-primary"/>
+						English
+					</label>
+				</div>
+			</fieldset>
+			<noscript>
+				<button type="submit" class="mt-2 rounded-md bg-primary px-4 py-2 text-black">{ i18n.T(ctx, "Simpan", "Save") }</button>
+			</noscript>
+		</form>
+	}
+}
+
+// Creator ports app/(tabs)/inbox.tsx, which shows the creator page.
+templ Creator() {
+	@layouts.App(i18n.T(ctx, "Pencipta", "Creator")+" · Farahdin", layouts.TabCreator) {
+		@components.Header(i18n.T(ctx, "Pencipta", "Creator"), "/")
+		<div class="mx-auto mt-24 w-fit">
+			<p class="font-javassoul text-[60px] text-primary">Farahdin</p>
+			<p class="-mt-2.5 ml-1 font-garamond text-lg">{ i18n.T(ctx, "Dibuat oleh", "Created by") } { "@vikyarifian" }</p>
+		</div>
+		<section class="mt-14 flex flex-col p-4">
+			<h2 class="text-lg font-semibold">{ i18n.T(ctx, "Kontak", "Contact") }</h2>
+			@components.Divider()
+			<p class="flex items-center gap-2 py-2">
+				@components.Icon("globe-outline", "size-6 text-primary")
+				<a href="https://profile.vikyarifian.web.id" rel="noopener" target="_blank" class="underline-offset-4 hover:underline">https://profile.vikyarifian.web.id</a>
+			</p>
+			@components.Divider()
+			<p class="flex items-center gap-2 py-2">
+				@components.Icon("logo-twitter", "size-6 text-primary")
+				{ "@vikyarifian" }
+			</p>
+			@components.Divider()
+			<p class="flex items-center gap-2 py-2">
+				@components.Icon("logo-instagram", "size-6 text-primary")
+				{ "@vikyarifian" }
+			</p>
+			@components.Divider()
+		</section>
+	}
+}
+
+// Offline is the service worker's navigation fallback.
+templ Offline() {
+	@layouts.Base("Offline · Farahdin") {
+		<main id="main" class="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
+			<p class="font-javassoul text-[50px] text-primary">Farahdin</p>
+			<h1 class="text-xl font-semibold">{ i18n.T(ctx, "Kamu sedang offline", "You are offline") }</h1>
+			<p class="text-muted">{ i18n.T(ctx, "Bacaan Farahdin membutuhkan koneksi internet. Coba lagi saat kembali online.", "Farahdin readings need an internet connection. Try again when you are back online.") }</p>
+			<a href="/" class="rounded-md bg-primary px-4 py-2 font-medium text-black">{ i18n.T(ctx, "Coba lagi", "Try again") }</a>
+		</main>
+	}
+}
+
+// ErrorPage is shown for 404 and 500 responses.
+templ ErrorPage(status int, message string) {
+	@layouts.Base("Farahdin") {
+		<main id="main" class="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
+			<p class="font-javassoul text-[50px] text-primary">Farahdin</p>
+			<h1 class="text-xl font-semibold">{ message }</h1>
+			<a href="/" class="rounded-md bg-primary px-4 py-2 font-medium text-black">{ i18n.T(ctx, "Kembali ke beranda", "Back to home") }</a>
+		</main>
+	}
+}

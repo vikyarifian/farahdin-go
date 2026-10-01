@@ -1,0 +1,191 @@
+package pages
+
+import (
+	"context"
+	"strconv"
+	"strings"
+
+	"github.com/vikyarifian/farahdin-go/internal/domain"
+	"github.com/vikyarifian/farahdin-go/internal/i18n"
+	"github.com/vikyarifian/farahdin-go/web"
+	"github.com/vikyarifian/farahdin-go/web/templates/components"
+	"github.com/vikyarifian/farahdin-go/web/templates/layouts"
+)
+
+// Topics is a feature's topic list (the source's viewTopic state).
+templ Topics(title string, topics []domain.Topic, base string, large bool) {
+	@layouts.Feature(title, "/", layouts.TabHome) {
+		@components.TopicGrid(topics, base, large)
+	}
+}
+
+// readingForm wraps a feature form with the HTMX contract used by every
+// reading: post to the same URL, render the result sheet into #result.
+templ readingForm(action string) {
+	<form
+		method="post"
+		action={ templ.SafeURL(action) }
+		hx-post={ action }
+		hx-target="#result"
+		hx-swap="innerHTML"
+		hx-disabled-elt="find button[type=submit]"
+		hx-indicator="find button[type=submit]"
+		class="px-4 pb-4"
+	>
+		{ children... }
+	</form>
+}
+
+// Result renders a reading outcome into #result.
+templ Result(v ResultView) {
+	if v.Error != "" {
+		@components.Alert(v.Error)
+	} else if v.Show {
+		@components.ResultSheet(v.Title, v.Subtitle, v.CloseHref) {
+			@components.Lines(v.Reading.Lines)
+			if v.Reading.Love > 0 {
+				<div class="flex justify-center gap-1 p-2.5" role="img" aria-label={ strconv.Itoa(v.Reading.Love) + "/5" }>
+					for i := 1; i <= 5; i++ {
+						if i <= v.Reading.Love {
+							<img src={ web.Asset("images/icon/love.png") } alt="" class="size-[50px] object-contain"/>
+						} else {
+							<img src={ web.Asset("images/icon/unlove.png") } alt="" class="size-[50px] object-contain"/>
+						}
+					}
+				</div>
+			}
+			if v.Reading.ImageURL != "" {
+				<img src={ v.Reading.ImageURL } alt="" referrerpolicy="no-referrer" class="mx-auto mt-4 h-[250px] w-[90%] object-contain"/>
+			}
+			@components.Notice(v.Reading.Notice)
+		}
+	}
+}
+
+// --- Primbon ---
+
+// Primbon ports the Primbon topic form.
+templ Primbon(v PrimbonView) {
+	@layouts.Feature("Primbon", "/primbon", layouts.TabHome) {
+		@components.FeatureHero("images/icon/primbon-icon-header.png", v.Topic.Label(i18n.Lang(ctx)))
+		@readingForm("/primbon/" + strconv.Itoa(v.Topic.Key)) {
+			if v.Fields.Name {
+				@components.Field("name", i18n.T(ctx, "Nama", "Name"), "") {
+					@components.TextInput("name", "name", v.Name, i18n.T(ctx, "Masukan Nama", "Input Name"), templ.Attributes{"required": true, "maxlength": "100"})
+				}
+			}
+			if v.Fields.Dream {
+				@components.Field("dream", i18n.T(ctx, "Mimpi", "Dream"), "") {
+					@components.TextInput("dream", "dream", v.Dream, i18n.T(ctx, "Masukan Mimpi", "Input Dream"), templ.Attributes{"required": true, "maxlength": "200"})
+				}
+			}
+			if v.Fields.Birthday {
+				@components.Field("birthday", i18n.T(ctx, "Tanggal Lahir", "Birthdate"), "") {
+					@components.DateInput("birthday", "birthday", v.Birthday, v.Today, nil)
+				}
+			}
+			if v.Fields.Partner {
+				@components.Field("partner", i18n.T(ctx, "Pasangan", "Partner"), "") {
+					@components.TextInput("partner", "partner", v.Partner, i18n.T(ctx, "Masukan Nama Pasangan", "Input Partner Name"), templ.Attributes{"required": true, "maxlength": "100"})
+				}
+			}
+			if v.Fields.Date {
+				@components.Field("date", primbonDateLabel(ctx, v.Topic.Key), "") {
+					@components.DateInput("date", "date", v.Date, "", nil)
+				}
+			}
+			@components.SubmitButton(i18n.T(ctx, "Mulai", "Generate"))
+		}
+		<div id="result" aria-live="polite">
+			@Result(v.Result)
+		</div>
+	}
+}
+
+func primbonDateLabel(ctx context.Context, topic int) string {
+	if domain.TopicIn(topic, 4, 8, 9) {
+		return i18n.T(ctx, "Tanggal", "Date")
+	}
+	return i18n.T(ctx, "Tanggal Lahir Pasangan", "Partner Birthdate")
+}
+
+// --- Horoscope ---
+
+// Horoscope ports the Horoscope topic form.
+templ Horoscope(v HoroscopeView) {
+	@layouts.Feature(i18n.T(ctx, "Horoskop", "Horoscope"), "/horoscope", layouts.TabHome) {
+		<div class="mb-4 flex flex-col items-center">
+			<div class="relative flex h-[220px] w-full items-center justify-center">
+				<img src={ web.Asset("images/icon/horoscope-icon-header.png") } alt="" class="absolute inset-0 size-full object-contain"/>
+				@HoroscopeSign(v.Sign, true, false)
+			</div>
+			<h2 class="mt-4 font-garamond-sc text-[32px]">{ v.Topic.Label(i18n.Lang(ctx)) }</h2>
+			@HoroscopeSign(v.Sign, false, false)
+		</div>
+		@readingForm("/horoscope/" + strconv.Itoa(v.Topic.Key)) {
+			@components.Field("birthday", i18n.T(ctx, "Tanggal Lahir", "Birthdate"), "") {
+				@components.DateInput("birthday", "birthday", v.Birthday, v.Today, templ.Attributes{
+					"hx-get": "/horoscope/sign", "hx-trigger": "change", "hx-swap": "none",
+				})
+			}
+			if v.Topic.Key == 6 {
+				@components.Field("partner_date", i18n.T(ctx, "Tanggal Lahir Pasangan", "Partner Birthdate"), "") {
+					@components.DateInput("partner_date", "partner_date", v.PartnerDate, v.Today, nil)
+				}
+			}
+			@components.SubmitButton(i18n.T(ctx, "Mulai", "Generate"))
+		}
+		<div id="result" aria-live="polite">
+			@Result(v.Result)
+		</div>
+	}
+}
+
+// HoroscopeSign shows the zodiac image (icon=true) or the sign name and date
+// range. oob marks it for an HTMX out-of-band swap.
+templ HoroscopeSign(sign string, icon bool, oob bool) {
+	if icon {
+		<span id="sign-icon" class="relative" hx-swap-oob={ oobAttr(oob) }>
+			if sign != "" {
+				<img src={ web.Asset("images/icon/zodiac/" + strings.ToLower(sign) + ".png") } alt="" class="size-[60px] object-contain"/>
+			}
+		</span>
+	} else {
+		<div id="sign-label" class="flex flex-col items-center" aria-live="polite" hx-swap-oob={ oobAttr(oob) }>
+			<p class="-mb-2.5 font-garamond-sc text-[32px]">{ sign }</p>
+			<p class="p-1 text-sm text-primary">{ domain.ZodiacDate(sign) }</p>
+		</div>
+	}
+}
+
+// oobAttr marks an element for an out-of-band swap ("" = normal render).
+func oobAttr(oob bool) string {
+	if oob {
+		return "true"
+	}
+	return ""
+}
+
+// HoroscopeSignSwap is returned by GET /horoscope/sign: both blocks, out of band.
+templ HoroscopeSignSwap(sign string) {
+	@HoroscopeSign(sign, true, true)
+	@HoroscopeSign(sign, false, true)
+}
+
+// --- Clairvoyance ---
+
+// Clairvoyance ports the Clairvoyance topic form.
+templ Clairvoyance(v ClairvoyanceView) {
+	@layouts.Feature(i18n.T(ctx, "Kewaskitaan", "Clairvoyance"), "/clairvoyance", layouts.TabHome) {
+		@components.FeatureHero("images/icon/clair-icon-header.png", v.Topic.Label(i18n.Lang(ctx)))
+		@readingForm("/clairvoyance/" + strconv.Itoa(v.Topic.Key)) {
+			@components.Field("name", i18n.T(ctx, "Nama", "Name"), "") {
+				@components.TextInput("name", "name", v.Name, i18n.T(ctx, "Masukan Nama", "Input Name"), templ.Attributes{"required": true, "maxlength": "100"})
+			}
+			@components.SubmitButton(i18n.T(ctx, "Mulai", "Generate"))
+		}
+		<div id="result" aria-live="polite">
+			@Result(v.Result)
+		</div>
+	}
+}
