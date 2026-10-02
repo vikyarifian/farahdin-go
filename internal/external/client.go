@@ -1,6 +1,6 @@
 // Package external talks to the third-party sites the source app scraped
 // directly from the phone (primbon.com, horoscope.com, californiapsychics.com,
-// matrixdestinychart.com) and to the Google Translate endpoint it used.
+// matrixdestinychart.com) and to Google Translate (plus backups, see translate.go).
 // In the PWA these calls run on the server: browsers would block them (CORS)
 // and the server can apply timeouts and size limits.
 package external
@@ -22,7 +22,6 @@ type Sources struct {
 	Horoscope         string // https://www.horoscope.com
 	CaliforniaPsychic string // https://www.californiapsychics.com
 	MatrixDestiny     string // https://matrixdestinychart.com
-	Translate         string // https://translate.googleapis.com
 }
 
 // DefaultSources are the production upstreams used by the source app.
@@ -33,7 +32,6 @@ func DefaultSources() Sources {
 		Horoscope:         "https://www.horoscope.com",
 		CaliforniaPsychic: "https://www.californiapsychics.com",
 		MatrixDestiny:     "https://matrixdestinychart.com",
-		Translate:         "https://translate.googleapis.com",
 	}
 }
 

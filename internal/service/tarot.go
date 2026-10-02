@@ -38,7 +38,9 @@ var tarotPages = map[int]struct{ path, start, end string }{
 }
 
 // Tarot ports tarot.tsx generate() for the single-card topics (1, 3, 4).
-func (r *Readings) Tarot(ctx context.Context, topic, card int, lang string) (Reading, error) {
+func (r *Readings) Tarot(ctx context.Context, topic, card int, lang string) (res Reading, err error) {
+	ctx, st := withTranslateStatus(ctx)
+	defer func() { noteTranslation(st, lang, &res) }()
 	page, ok := tarotPages[topic]
 	if !ok {
 		page = tarotPages[1] // the source's switch default
@@ -63,7 +65,9 @@ func (r *Readings) Tarot(ctx context.Context, topic, card int, lang string) (Rea
 }
 
 // TarotTrueLove ports tarot.tsx pickCard() for topic 2 (two cards).
-func (r *Readings) TarotTrueLove(ctx context.Context, you, partner int, lang string) (Reading, error) {
+func (r *Readings) TarotTrueLove(ctx context.Context, you, partner int, lang string) (res Reading, err error) {
+	ctx, st := withTranslateStatus(ctx)
+	defer func() { noteTranslation(st, lang, &res) }()
 	html, err := r.Fetch.PostForm(ctx, r.Src.Horoscope+"/us/tarot/tarot-true-love.aspx", url.Values{
 		"CardNumber_1_numericalint": {strconv.Itoa(you)},
 		"CardNumber_2_numericalint": {strconv.Itoa(partner)},

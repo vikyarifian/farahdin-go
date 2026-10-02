@@ -160,25 +160,32 @@
     canvas.height = H;
     var x = canvas.getContext("2d");
 
-    // Background: theme colour, the Farahdin photo faded in at the top, a soft glow.
+    // Background: theme colour, then — clipped to the inner frame so it never
+    // runs over the gold border — the Farahdin photo, lowered a little and
+    // faded out, and a soft glow.
     x.fillStyle = BG;
     x.fillRect(0, 0, W, H);
+    x.save();
+    roundRect(x, 52, 52, W - 104, H - 104, 18);
+    x.clip();
     if (a.bg) {
+      var top = 64;
       var bh = W * a.bg.naturalHeight / a.bg.naturalWidth;
       x.globalAlpha = 0.2;
-      x.drawImage(a.bg, 0, 0, W, bh);
+      x.drawImage(a.bg, 0, top, W, bh);
       x.globalAlpha = 1;
-      var fade = x.createLinearGradient(0, bh * 0.3, 0, bh);
+      var fade = x.createLinearGradient(0, top + bh * 0.3, 0, top + bh);
       fade.addColorStop(0, "rgba(35,29,50,0)");
       fade.addColorStop(1, BG);
       x.fillStyle = fade;
-      x.fillRect(0, 0, W, bh + 1);
+      x.fillRect(0, top, W, bh + 1);
     }
     var glow = x.createRadialGradient(W / 2, H * 0.42, 40, W / 2, H * 0.42, W * 0.75);
     glow.addColorStop(0, "rgba(189,156,73,0.12)");
     glow.addColorStop(1, "rgba(189,156,73,0)");
     x.fillStyle = glow;
     x.fillRect(0, 0, W, H);
+    x.restore();
 
     // Frame.
     x.strokeStyle = "rgba(189,156,73,0.6)";

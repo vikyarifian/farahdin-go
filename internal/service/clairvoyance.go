@@ -12,7 +12,9 @@ import (
 // Clairvoyance ports app/pages/clairvoyance.tsx generate(): three random
 // cards and the first name are posted to a horoscope.com tarot page and the
 // topic's section is cut out of the reading.
-func (r *Readings) Clairvoyance(ctx context.Context, topic int, name, lang string) (Reading, error) {
+func (r *Readings) Clairvoyance(ctx context.Context, topic int, name, lang string) (res Reading, err error) {
+	ctx, st := withTranslateStatus(ctx)
+	defer func() { noteTranslation(st, lang, &res) }()
 	if strings.TrimSpace(name) == "" {
 		return Reading{}, &ErrValidation{pick(lang == "ID", "Nama wajib diisi.", "Name is required.")}
 	}

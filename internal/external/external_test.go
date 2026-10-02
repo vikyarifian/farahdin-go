@@ -92,29 +92,6 @@ func TestStrPipeline(t *testing.T) {
 	}
 }
 
-func TestTranslate(t *testing.T) {
-	var gotQuery string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotQuery = r.URL.Query().Get("q")
-		if r.URL.Query().Get("sl") != "id" || r.URL.Query().Get("tl") != "en" {
-			t.Errorf("languages: %v", r.URL.Query())
-		}
-		w.Write([]byte(`{"sentences":[{"trans":"Hello. ","orig":"Halo. "},{"trans":"World"},{"src_translit":"x"}]}`))
-	}))
-	defer srv.Close()
-	tr := &Translator{Client: NewClient(5 * time.Second), Base: srv.URL}
-	got, err := tr.Translate(context.Background(), "Halo & #dunia", "id", "en")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if gotQuery != "Halo dan #dunia" {
-		t.Errorf("query = %q (& must become dan, # must survive encoding)", gotQuery)
-	}
-	if len(got) != 2 || got[0] != "Hello. " || got[1] != "World" {
-		t.Errorf("sentences = %q", got)
-	}
-}
-
 func TestClientRejectsErrorsAndCapsBody(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/fail" {
@@ -135,5 +112,142 @@ func TestClientRejectsErrorsAndCapsBody(t *testing.T) {
 	body, err := c.PostForm(context.Background(), srv.URL+"/ok", map[string][]string{"a": {"b"}})
 	if err != nil || len(body) != 10 {
 		t.Errorf("body len %d err %v", len(body), err)
+	}
+}
+
+// translateServer answers for every endpoint kind by path; status overrides
+// the HTTP status per kind (0 = OK).
+func translateServer(t *testing.T, status map[string]int, calls map[string]int) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		kind := map[string]string{"/translate_a/single": KindGTX, "/translate_a/t": KindDict, "/get": KindMyMemory}[r.URL.Path]
+		calls[kind]++
+		if code := status[kind]; code != 0 {
+			http.Error(w, "nope", code)
+			return
+		}
+		switch kind {
+		case KindGTX:
+			if r.URL.Query().Get("q") != "Halo & #dunia" && !strings.HasPrefix(r.URL.Query().Get("q"), "Hello") && r.URL.Query().Get("q") != "x" {
+				t.Errorf("gtx q = %q", r.URL.Query().Get("q"))
+			}
+			w.Write([]byte(`{"sentences":[{"trans":"Hello. "},{"trans":"World"},{"src_translit":"x"}]}`))
+		case KindDict:
+			w.Write([]byte(`["Halo dunia.` + `\` + `nBaris dua."]`))
+		case KindMyMemory:
+			w.Write([]byte(`{"responseData":{"translatedText":"Halo (` + r.URL.Query().Get("langpair") + `)"},"responseStatus":200}`))
+		}
+	}))
+}
+
+func endpoints(base string, kinds ...string) []*Endpoint {
+	var eps []*Endpoint
+	for _, k := range kinds {
+		eps = append(eps, &Endpoint{Kind: k, Base: base})
+	}
+	return eps
+}
+
+func TestTranslateGTX(t *testing.T) {
+	calls := map[string]int{}
+	var gotQuery string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls["gtx"]++
+		gotQuery = r.URL.Query().Get("q")
+		w.Write([]byte(`{"sentences":[{"trans":"Hello. "},{"trans":"World"},{"src_translit":"x"}]}`))
+	}))
+	defer srv.Close()
+	tr := &Translator{Client: NewClient(5 * time.Second), Endpoints: endpoints(srv.URL, KindGTX)}
+	got, err := tr.Translate(context.Background(), "Halo & #dunia", "id", "en")
+	if err != nil || strings.Join(got, "|") != "Hello. |World" {
+		t.Fatalf("got %q, %v", got, err)
+	}
+	if gotQuery != "Halo dan #dunia" {
+		t.Errorf("query = %q (& must become dan, # must survive encoding)", gotQuery)
+	}
+}
+
+func TestTranslateFallsBackAndCoolsDown(t *testing.T) {
+	calls := map[string]int{}
+	srv := translateServer(t, map[string]int{KindGTX: http.StatusTooManyRequests}, calls)
+	defer srv.Close()
+	tr := &Translator{Client: NewClient(5 * time.Second), Endpoints: endpoints(srv.URL, KindGTX, KindDict), Backoff: time.Millisecond}
+
+	nl := string(rune(10))
+	got, err := tr.Translate(context.Background(), "Hello world."+nl+"Line two.", "en", "id")
+	if err != nil || strings.Join(got, "|") != "Halo dunia.|Baris dua." {
+		t.Fatalf("got %q, %v", got, err)
+	}
+	if calls[KindGTX] != 1 || calls[KindDict] != 1 {
+		t.Errorf("calls = %v", calls)
+	}
+	if _, err := tr.Translate(context.Background(), "Hello world."+nl+"Line two.", "en", "id"); err != nil || calls[KindDict] != 1 {
+		t.Errorf("second call must come from the cache: %v", calls)
+	}
+	if _, err := tr.Translate(context.Background(), "Hello again", "en", "id"); err != nil || calls[KindGTX] != 1 || calls[KindDict] != 2 {
+		t.Errorf("gtx must be skipped while cooling down: %v", calls)
+	}
+}
+
+func TestTranslateReachesMyMemoryLast(t *testing.T) {
+	calls := map[string]int{}
+	srv := translateServer(t, map[string]int{KindGTX: 429, KindDict: 503}, calls)
+	defer srv.Close()
+	tr := &Translator{Client: NewClient(5 * time.Second), Endpoints: endpoints(srv.URL, KindGTX, KindDict, KindMyMemory), Backoff: time.Millisecond}
+	got, err := tr.Translate(context.Background(), "snake", "auto", "id")
+	if err != nil || len(got) != 1 || got[0] != "Halo (autodetect|id)" {
+		t.Fatalf("got %q, %v", got, err)
+	}
+}
+
+func TestTranslateGivesUpWhenEverythingFails(t *testing.T) {
+	calls := map[string]int{}
+	srv := translateServer(t, map[string]int{KindGTX: 429, KindDict: 429, KindMyMemory: 500}, calls)
+	defer srv.Close()
+	tr := &Translator{Client: NewClient(5 * time.Second), Endpoints: endpoints(srv.URL, KindGTX, KindDict, KindMyMemory), Backoff: time.Millisecond, Retries: 2}
+	if _, err := tr.Translate(context.Background(), "x", "en", "id"); err == nil {
+		t.Fatal("expected an error")
+	}
+	// Each endpoint is tried once; then all are cooling down, so the retries skip them.
+	if calls[KindGTX] != 1 || calls[KindDict] != 1 || calls[KindMyMemory] != 1 {
+		t.Errorf("calls = %v", calls)
+	}
+}
+
+func TestDefaultEndpoints(t *testing.T) {
+	eps := DefaultTranslateEndpoints()
+	if len(eps) != 11 || eps[0].Kind != KindGTX || eps[0].Base != "https://translate.googleapis.com" || eps[10].Kind != KindMyMemory {
+		t.Errorf("want the source app's endpoint first and 10 backups ending with MyMemory, got %d", len(eps))
+	}
+}
+
+func TestChunkText(t *testing.T) {
+	nl := string(rune(10))
+	long := strings.Repeat("Sentence number one is here. ", 30) // ~870 bytes on one line
+	chunks := chunkText("Short line."+nl+long+nl+"Tail.", 450)
+	for _, c := range chunks {
+		if len(c) > 450 {
+			t.Errorf("chunk of %d bytes", len(c))
+		}
+	}
+	joined := strings.Join(chunks, nl)
+	if !strings.HasPrefix(joined, "Short line."+nl) || !strings.HasSuffix(joined, nl+"Tail.") {
+		t.Errorf("structure lost: %q", joined[:40])
+	}
+	if strings.Count(strings.ReplaceAll(joined, nl, " "), "Sentence number one is here.") != 30 {
+		t.Error("text lost while chunking")
+	}
+}
+
+func TestRateLimitCoolsTheWholeKind(t *testing.T) {
+	calls := map[string]int{}
+	srv := translateServer(t, map[string]int{KindGTX: 429}, calls)
+	defer srv.Close()
+	// Three gtx "hosts" then a dict endpoint: one 429 must skip the other gtx ones.
+	tr := &Translator{Client: NewClient(5 * time.Second), Endpoints: endpoints(srv.URL, KindGTX, KindGTX, KindGTX, KindDict), Backoff: time.Millisecond}
+	if _, err := tr.Translate(context.Background(), "Hello", "en", "id"); err != nil {
+		t.Fatal(err)
+	}
+	if calls[KindGTX] != 1 || calls[KindDict] != 1 {
+		t.Errorf("calls = %v, want one gtx attempt then dict", calls)
 	}
 }

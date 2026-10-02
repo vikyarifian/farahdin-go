@@ -266,7 +266,7 @@ func (a *App) tarotRead(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				sheet.Error = readingError(r, err)
 			} else {
-				sheet.Read, sheet.Reading = true, service.Reading{Lines: service.CleanLines(reading.Lines)}
+				sheet.Read, sheet.Reading = true, service.Reading{Lines: service.CleanLines(reading.Lines), Notice: reading.Notice}
 				sheet.Share = a.share(r, shareInput{Title: "Tarot", Subtitle: t.Label(lang(r)), Lines: sheet.Reading.Lines, Images: tarotShareImages(sheet)})
 			}
 		}
@@ -285,7 +285,7 @@ func (a *App) tarotRead(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		sheet.Error = readingError(r, err)
 	} else {
-		sheet.Read, sheet.Reading = true, service.Reading{Lines: service.CleanLines(reading.Lines)}
+		sheet.Read, sheet.Reading = true, service.Reading{Lines: service.CleanLines(reading.Lines), Notice: reading.Notice}
 		sheet.Share = a.share(r, shareInput{Title: "Tarot", Subtitle: t.Label(lang(r)), Lines: sheet.Reading.Lines, Images: tarotShareImages(sheet)})
 	}
 	v.Sheet = &sheet

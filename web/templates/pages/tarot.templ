@@ -132,6 +132,7 @@ templ TarotReading(s TarotSheet) {
 		</div>
 		if s.Read {
 			@components.Lines(s.Reading.Lines)
+			@components.Notice(s.Reading.Notice)
 		} else {
 			if s.Error != "" {
 				@components.Alert(s.Error)

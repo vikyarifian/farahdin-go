@@ -19,7 +19,7 @@ import (
 func liveReadings() *Readings {
 	client := external.NewClient(30 * time.Second)
 	src := external.DefaultSources()
-	return &Readings{Fetch: client, Translate: &external.Translator{Client: client, Base: src.Translate}, Src: src, Now: time.Now}
+	return &Readings{Fetch: client, Translate: external.NewTranslator(client), Src: src, Now: time.Now}
 }
 
 func requireLines(t *testing.T, r Reading, err error) {

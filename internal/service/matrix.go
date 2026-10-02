@@ -33,7 +33,9 @@ func (r *Readings) MatrixDestiny(ctx context.Context, name string, birthday time
 		Birthday: birthday,
 		Matrix:   domain.ComputeMatrix(birthday),
 	}
+	ctx, st := withTranslateStatus(ctx)
 	reading, err := r.matrixReading(ctx, name, birthday, lang)
+	noteTranslation(st, lang, &reading)
 	if err != nil {
 		slog.WarnContext(ctx, "matrix reading unavailable", "err", err)
 		res.Reading.Notice = pick(lang == "ID",
@@ -104,9 +106,12 @@ func (r *Readings) matrixReading(ctx context.Context, name string, birthday time
 	if lang != "ID" {
 		return Reading{Lines: strings.Split(text, "<br>")}, nil
 	}
-	trans, err := r.Translate.Translate(ctx, strings.ReplaceAll(text, "<br>", ". <br>"), "en", "id")
+	trans, err := r.translate(ctx, strings.ReplaceAll(text, "<br>", ". <br>"), "en", "id")
 	if err != nil {
 		return Reading{}, err
+	}
+	if translationFailed(ctx) {
+		return Reading{Lines: strings.Split(text, "<br>")}, nil
 	}
 	joined := strings.ReplaceAll(strings.ReplaceAll(strings.Join(trans, "<br>"), ". <br>", ". "), "<br><br>", "<br>")
 	return Reading{Lines: strings.Split(joined, "<br>")}, nil

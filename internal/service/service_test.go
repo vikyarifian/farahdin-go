@@ -56,7 +56,7 @@ func newReadings(pages map[string]string) (*Readings, *fakeFetcher, *fakeTransla
 	tr := &fakeTranslator{}
 	src := external.Sources{
 		Primbon: "https://p", PrimbonPost: "https://pp", Horoscope: "https://h",
-		CaliforniaPsychic: "https://c", MatrixDestiny: "https://m", Translate: "https://t",
+		CaliforniaPsychic: "https://c", MatrixDestiny: "https://m",
 	}
 	return &Readings{Fetch: f, Translate: tr, Src: src, Now: func() time.Time { return fixedNow }}, f, tr
 }
@@ -364,5 +364,41 @@ Courage.
 	}
 	if got := strings.Join(CleanLines(res.Lines), "|"); got != "Wellness: Malachite|Courage." {
 		t.Errorf("clairvoyance lines = %q", got)
+	}
+}
+
+type failingTranslator struct{}
+
+func (failingTranslator) Translate(context.Context, string, string, string) ([]string, error) {
+	return nil, errors.New("upstream returned 429")
+}
+
+func TestTranslationFallbackShowsOriginalWithNotice(t *testing.T) {
+	r, _, _ := newReadings(map[string]string{
+		"https://h/us/horoscopes/general/horoscope-general-daily-today.aspx": `<div class="main-horoscope"><p>Oct 1, 2026 - Bold moves pay off.</p></div>`,
+		"https://p/arti_nama.php": `<div id="body">ARTI NAMA` + ads + `
+Nama Spirit, memiliki arti: Analitis.
+Nama: </div>`,
+	})
+	r.Translate = failingTranslator{}
+	in := HoroscopeInput{Birthday: time.Date(1998, 10, 1, 0, 0, 0, 0, time.UTC)}
+
+	res, err := r.Horoscope(context.Background(), 2, in, "ID")
+	if err != nil {
+		t.Fatalf("a failed translation must not fail the reading: %v", err)
+	}
+	if strings.Join(res.Lines, "|") != "Bold moves pay off." || !strings.Contains(res.Notice, "Terjemahan sedang tidak tersedia") {
+		t.Errorf("ID fallback = %q / %q", res.Lines, res.Notice)
+	}
+
+	res, err = r.Primbon(context.Background(), 1, PrimbonInput{Name: "Spirit Walker"}, "EN")
+	if err != nil || !strings.Contains(strings.Join(res.Lines, " "), "Analitis") || !strings.Contains(res.Notice, "original language") {
+		t.Errorf("EN fallback = %q / %q / %v", res.Lines, res.Notice, err)
+	}
+
+	// No notice when nothing had to be translated.
+	res, _ = r.Horoscope(context.Background(), 2, in, "EN")
+	if res.Notice != "" {
+		t.Errorf("unexpected notice %q", res.Notice)
 	}
 }

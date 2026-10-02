@@ -56,7 +56,9 @@ func ValidatePrimbon(topic int, in PrimbonInput, lang string) error {
 }
 
 // Primbon ports app/pages/primbon.tsx generate().
-func (r *Readings) Primbon(ctx context.Context, topic int, in PrimbonInput, lang string) (Reading, error) {
+func (r *Readings) Primbon(ctx context.Context, topic int, in PrimbonInput, lang string) (res Reading, err error) {
+	ctx, st := withTranslateStatus(ctx)
+	defer func() { noteTranslation(st, lang, &res) }()
 	if err := ValidatePrimbon(topic, in, lang); err != nil {
 		return Reading{}, err
 	}
@@ -114,13 +116,13 @@ func (r *Readings) primbonNameMeaning(ctx context.Context, in PrimbonInput, lang
 	if err != nil {
 		return Reading{}, err
 	}
-	lines, err := r.Translate.Translate(ctx, text, "id", "en")
+	lines, err := r.translate(ctx, text, "id", "en")
 	return Reading{Lines: lines}, err
 }
 
 // case 2: Tafsir Mimpi.
 func (r *Readings) primbonDream(ctx context.Context, in PrimbonInput, lang string) (Reading, error) {
-	trans, err := r.Translate.Translate(ctx, in.Dream, "auto", "id")
+	trans, err := r.translate(ctx, in.Dream, "auto", "id")
 	if err != nil {
 		return Reading{}, err
 	}
@@ -146,7 +148,7 @@ func (r *Readings) primbonDream(ctx context.Context, in PrimbonInput, lang strin
 	if err != nil {
 		return Reading{}, err
 	}
-	lines, err := r.Translate.Translate(ctx, text, "id", "en")
+	lines, err := r.translate(ctx, text, "id", "en")
 	return Reading{Lines: lines}, err
 }
 
@@ -195,7 +197,7 @@ func (r *Readings) primbonMatch(ctx context.Context, in PrimbonInput, lang strin
 		if err != nil {
 			return Reading{}, err
 		}
-		trans, err := r.Translate.Translate(ctx, positive+". "+"Sisi Negatif Anda: "+neg+". "+advice, "id", "en")
+		trans, err := r.translate(ctx, positive+". "+"Sisi Negatif Anda: "+neg+". "+advice, "id", "en")
 		if err != nil {
 			return Reading{}, err
 		}
@@ -242,7 +244,7 @@ func (r *Readings) primbonImportantDate(ctx context.Context, in PrimbonInput, la
 		return Reading{}, err
 	}
 	if lang == "EN" {
-		lines, err := r.Translate.Translate(ctx, strings.Join(content, "\n"), "id", "en")
+		lines, err := r.translate(ctx, strings.Join(content, "\n"), "id", "en")
 		return Reading{Lines: lines}, err
 	}
 	return Reading{Lines: content}, nil

@@ -6,8 +6,10 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/url"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/vikyarifian/farahdin-go/internal/external"
@@ -74,11 +76,55 @@ func CleanLines(lines []string) []string {
 	return out
 }
 
+// translateStatus records, per reading, whether a translation fell back to
+// the original text.
+type translateStatus struct{ failed atomic.Bool }
+
+type translateStatusKey struct{}
+
+func withTranslateStatus(ctx context.Context) (context.Context, *translateStatus) {
+	st := &translateStatus{}
+	return context.WithValue(ctx, translateStatusKey{}, st), st
+}
+
+func translationFailed(ctx context.Context) bool {
+	st, _ := ctx.Value(translateStatusKey{}).(*translateStatus)
+	return st != nil && st.failed.Load()
+}
+
+// translate calls the translator; when it still fails after its retries the
+// original text is returned (one line per paragraph) and the reading is
+// marked, so the user gets the result in its source language with a notice
+// instead of an error. The error result is always nil.
+func (r *Readings) translate(ctx context.Context, text, from, to string) ([]string, error) {
+	lines, err := r.Translate.Translate(ctx, text, from, to)
+	if err == nil {
+		return lines, nil
+	}
+	slog.WarnContext(ctx, "translation unavailable, showing original text", "from", from, "to", to, "err", err)
+	if st, _ := ctx.Value(translateStatusKey{}).(*translateStatus); st != nil {
+		st.failed.Store(true)
+	}
+	return strings.Split(text, newline), nil
+}
+
+// newline separates paragraphs in the ported string pipelines.
+const newline = "\x0a"
+
+// noteTranslation adds the fallback notice to a finished reading.
+func noteTranslation(st *translateStatus, lang string, res *Reading) {
+	if st.failed.Load() && res.Notice == "" {
+		res.Notice = pick(lang == "ID",
+			"Terjemahan sedang tidak tersedia, hasil ditampilkan dalam bahasa aslinya.",
+			"Translation is unavailable right now; the result is shown in its original language.")
+	}
+}
+
 // translateOrSplit ports the common tail:
 // if (lang === 'ID') translate(text, 'en', 'id') else text.split('\n').
 func (r *Readings) translateEnToID(ctx context.Context, lang, text string) ([]string, error) {
 	if lang == "ID" {
-		return r.Translate.Translate(ctx, text, "en", "id")
+		return r.translate(ctx, text, "en", "id")
 	}
 	return strings.Split(text, "\n"), nil
 }
@@ -90,7 +136,7 @@ func (r *Readings) translateIDToEN(ctx context.Context, lang, content string) ([
 	if lang == "EN" {
 		text := external.Str(content).Replace("\n", ". .%.").ReplaceAll(".%.", ". ").
 			Replace("...", ".").Replace("..", ".").String()
-		return r.Translate.Translate(ctx, text, "id", "en")
+		return r.translate(ctx, text, "id", "en")
 	}
 	return strings.Split(content, "\n"), nil
 }

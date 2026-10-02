@@ -31,7 +31,9 @@ var horoscopePages = map[int]string{
 }
 
 // Horoscope ports app/pages/horoscope.tsx generate().
-func (r *Readings) Horoscope(ctx context.Context, topic int, in HoroscopeInput, lang string) (Reading, error) {
+func (r *Readings) Horoscope(ctx context.Context, topic int, in HoroscopeInput, lang string) (res Reading, err error) {
+	ctx, st := withTranslateStatus(ctx)
+	defer func() { noteTranslation(st, lang, &res) }()
 	sign, partner := HoroscopeSigns(in)
 	if topic == 6 {
 		return r.horoscopeMatch(ctx, sign, partner, lang)

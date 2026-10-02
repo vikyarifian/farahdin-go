@@ -69,7 +69,7 @@ func run() error {
 		Profiles: &service.Profiles{Users: users, Now: now},
 		Readings: &service.Readings{
 			Fetch:     client,
-			Translate: &external.Translator{Client: client, Base: src.Translate},
+			Translate: external.NewTranslator(client),
 			Src:       src,
 			Now:       now,
 		},
