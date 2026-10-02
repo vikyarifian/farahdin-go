@@ -291,6 +291,10 @@ func TestPWAEndpoints(t *testing.T) {
 	if resp.StatusCode != 200 {
 		t.Errorf("offline must be public: %d", resp.StatusCode)
 	}
+	resp, body = ta.do(t, c, "GET", "/favicon.ico", nil, nil)
+	if resp.StatusCode != 200 || !strings.HasPrefix(body, "\x00\x00\x01\x00") {
+		t.Errorf("favicon.ico: %d %q", resp.StatusCode, resp.Header.Get("Content-Type"))
+	}
 	resp, _ = ta.do(t, c, "GET", "/static/css/app.css?v=1", nil, nil)
 	if resp.StatusCode != 200 || !strings.Contains(resp.Header.Get("Cache-Control"), "immutable") {
 		t.Errorf("static: %d %q", resp.StatusCode, resp.Header.Get("Cache-Control"))

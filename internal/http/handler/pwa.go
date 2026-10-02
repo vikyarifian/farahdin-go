@@ -31,6 +31,13 @@ func staticHandler() http.Handler {
 	})
 }
 
+// favicon answers the /favicon.ico request browsers make on their own,
+// without reading the page's <link rel="icon">.
+func favicon(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	http.ServeFileFS(w, r, web.Static, "icons/favicon.ico")
+}
+
 // manifest is the Web App Manifest, built from the source app.json
 // (name, portrait orientation, #231d32 background, logo icon).
 func (a *App) manifest(w http.ResponseWriter, r *http.Request) {

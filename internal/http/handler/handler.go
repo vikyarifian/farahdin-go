@@ -51,6 +51,7 @@ func (a *App) Routes() http.Handler {
 	mux.HandleFunc("GET /manifest.webmanifest", a.manifest)
 	mux.HandleFunc("GET /sw.js", a.serviceWorker)
 	mux.Handle("GET /static/", staticHandler())
+	mux.HandleFunc("GET /favicon.ico", favicon)
 
 	// Signed-in.
 	mux.Handle("GET /profile", protected(a.profile))

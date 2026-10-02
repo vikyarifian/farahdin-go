@@ -25,6 +25,8 @@ templ Base(title string) {
 			<meta name="color-scheme" content="dark"/>
 			<meta name="htmx-config" content={ htmxConfig }/>
 			<link rel="manifest" href="/manifest.webmanifest"/>
+			<link rel="icon" href={ web.Asset("icons/favicon.ico") } sizes="48x48"/>
+			<link rel="icon" type="image/svg+xml" href={ web.Asset("icons/favicon.svg") }/>
 			<link rel="icon" type="image/png" sizes="32x32" href={ web.Asset("icons/favicon-32.png") }/>
 			<link rel="apple-touch-icon" href={ web.Asset("icons/apple-touch-icon.png") }/>
 			<meta name="apple-mobile-web-app-capable" content="yes"/>
