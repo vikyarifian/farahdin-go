@@ -90,7 +90,7 @@ func (a *App) Routes() http.Handler {
 		middleware.Logger,
 		middleware.SecurityHeaders(a.Cfg.SecureCookies()),
 		middleware.MaxBody(1<<20),
-		middleware.CrossOrigin,
+		middleware.CrossOrigin(a.Cfg.BaseURL),
 		middleware.Lang,
 		middleware.Authenticate(a.Sessions),
 	)

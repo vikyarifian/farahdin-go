@@ -99,3 +99,19 @@
 body.sheet-open {
   overflow: hidden;
 }
+
+/* Popover fallback for Safari before 17 (see app.js): a [popover] stays
+   hidden until .is-open, then sits centred over a dimmed page like the native one. */
+@supports not selector(:popover-open) {
+  [popover]:not(.is-open) {
+    display: none;
+  }
+  [popover].is-open {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    height: fit-content;
+    margin: auto;
+    box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.7);
+  }
+}

@@ -126,6 +126,30 @@ func TestCrossOriginPostRejected(t *testing.T) {
 	if resp.StatusCode != http.StatusForbidden {
 		t.Errorf("status = %d, want 403", resp.StatusCode)
 	}
+
+	// The rejection is a friendly message in the user's language, not "Forbidden".
+	resp, body := ta.do(t, c, "POST", "/auth/dev", url.Values{"email": {"v@example.com"}},
+		map[string]string{"Sec-Fetch-Site": "cross-site", "Origin": "https://evil.example", "Cookie": "lang=ID"})
+	if resp.StatusCode != http.StatusForbidden || !strings.Contains(body, "Muat ulang halaman") {
+		t.Errorf("status = %d, body = %q", resp.StatusCode, body)
+	}
+}
+
+// Safari before 16.4 sends no Sec-Fetch-Site, so the Origin is compared with
+// the Host; behind a proxy that rewrites Host, BASE_URL must still be accepted.
+func TestBaseURLOriginTrustedWithoutSecFetchSite(t *testing.T) {
+	ta := newTestApp(t, "")
+	c := ta.client(t)
+	resp, _ := ta.do(t, c, "POST", "/auth/dev", url.Values{"email": {"v@example.com"}},
+		map[string]string{"Sec-Fetch-Site": "", "Origin": "http://example.test"})
+	if resp.StatusCode == http.StatusForbidden {
+		t.Error("an Origin equal to BASE_URL must not be rejected")
+	}
+	resp, _ = ta.do(t, c, "POST", "/auth/dev", url.Values{"email": {"v@example.com"}},
+		map[string]string{"Sec-Fetch-Site": "", "Origin": "http://other.test"})
+	if resp.StatusCode != http.StatusForbidden {
+		t.Errorf("a foreign Origin without Sec-Fetch-Site: status = %d, want 403", resp.StatusCode)
+	}
 }
 
 func TestSessionLifecycle(t *testing.T) {

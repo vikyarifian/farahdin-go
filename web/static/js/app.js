@@ -122,16 +122,62 @@
   });
 
   // --- Network failures during HTMX requests ---------------------------------
-  document.addEventListener("htmx:sendError", function (e) {
-    var target = e.detail.target;
-    if (!target) return;
+  function showAlert(target, text) {
     var div = document.createElement("div");
     div.setAttribute("role", "alert");
     div.className = "my-3 rounded-lg border border-red-400/60 bg-red-950/40 p-3 text-sm text-red-200";
-    div.textContent = t("Tidak ada koneksi. Periksa internet kamu lalu coba lagi.",
-      "No connection. Check your internet and try again.");
+    div.textContent = text;
     target.replaceChildren(div);
+  }
+
+  document.addEventListener("htmx:sendError", function (e) {
+    if (!e.detail.target) return;
+    showAlert(e.detail.target, t("Tidak ada koneksi. Periksa internet kamu lalu coba lagi.",
+      "No connection. Check your internet and try again."));
   });
+
+  // A rejected request (403 from the cross-origin check) carries a plain-text
+  // message; show it as an alert instead of swapping it in as the result.
+  document.addEventListener("htmx:beforeSwap", function (e) {
+    if (e.detail.xhr.status !== 403 || !e.detail.target) return;
+    e.detail.shouldSwap = false;
+    showAlert(e.detail.target, e.detail.xhr.responseText.trim() ||
+      t("Permintaan ditolak. Muat ulang halaman lalu coba lagi.", "The request was rejected. Reload the page and try again."));
+  });
+
+  // --- Popover fallback (Safari before 17) ------------------------------------
+  // Without the popover API a [popover] element is shown and toggled with the
+  // .is-open class (styled in input.css), and a "toggle" event with newState
+  // is dispatched like the native one, so share-card.js works unchanged.
+  if (!HTMLElement.prototype.hasOwnProperty("popover")) {
+    var setPopover = function (p, open) {
+      if (p.classList.contains("is-open") === open) return;
+      p.classList.toggle("is-open", open);
+      var ev = document.createEvent("Event");
+      ev.initEvent("toggle", false, false);
+      ev.newState = open ? "open" : "closed";
+      p.dispatchEvent(ev);
+    };
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[popovertarget]");
+      if (btn) {
+        var p = document.getElementById(btn.getAttribute("popovertarget"));
+        if (!p) return;
+        var action = btn.getAttribute("popovertargetaction") || "toggle";
+        setPopover(p, action === "show" ? true : action === "hide" ? false : !p.classList.contains("is-open"));
+        return;
+      }
+      var open = document.querySelector("[popover].is-open");
+      if (open && !open.contains(e.target)) setPopover(open, false);
+    });
+    document.addEventListener("keydown", function (e) {
+      var open = document.querySelector("[popover].is-open");
+      if (e.key === "Escape" && open) {
+        e.stopImmediatePropagation();
+        setPopover(open, false);
+      }
+    }, true);
+  }
 
   // --- Share bar: native share sheet and copy, where supported ---------------
   function enableShare(root) {

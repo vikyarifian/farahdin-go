@@ -90,14 +90,25 @@ func SecurityHeaders(hsts bool) func(http.Handler) http.Handler {
 }
 
 // CrossOrigin rejects cross-site state-changing requests (CSRF) using the
-// standard library's Sec-Fetch-Site / Origin checks (ADR 0006).
-func CrossOrigin(next http.Handler) http.Handler {
+// standard library's Sec-Fetch-Site / Origin checks (ADR 0006). baseURL is
+// trusted as an origin, so the app still works behind a proxy that rewrites
+// the Host header. A rejected request gets a friendly message in the user's
+// language; app.js shows it in place of the result.
+func CrossOrigin(baseURL string) func(http.Handler) http.Handler {
 	p := http.NewCrossOriginProtection()
+	if err := p.AddTrustedOrigin(baseURL); err != nil {
+		slog.Warn("BASE_URL is not a valid trusted origin", "base_url", baseURL, "err", err)
+	}
 	p.SetDenyHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		slog.WarnContext(r.Context(), "cross-origin request rejected", "method", r.Method, "path", r.URL.Path)
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		slog.WarnContext(r.Context(), "cross-origin request rejected", "method", r.Method, "path", r.URL.Path,
+			"origin", r.Header.Get("Origin"), "host", r.Host, "sec_fetch_site", r.Header.Get("Sec-Fetch-Site"))
+		msg := "The request was rejected. Reload the page and try again."
+		if i18n.FromRequest(r) == "ID" {
+			msg = "Permintaan ditolak. Muat ulang halaman lalu coba lagi."
+		}
+		http.Error(w, msg, http.StatusForbidden)
 	}))
-	return p.Handler(next)
+	return p.Handler
 }
 
 // MaxBody bounds request bodies.

@@ -138,8 +138,21 @@
   // sentences splits a paragraph at the spaces that follow . ! ? (with any
   // closing quotes). Dots inside words ("viky.arifian", "1.5") do not split,
   // so joining the parts with a space gives back the original text.
+  // No regex lookbehind: Safari before 16.4 cannot parse it, which would stop
+  // this whole file from loading.
+  var SENTENCE_END = /[.!?]["'”’)\]]*$/;
   function sentences(p) {
-    return p.split(/(?<=[.!?]["'”’)\]]*)\s+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    var out = [], cur = [];
+    p.split(/\s+/).forEach(function (word) {
+      if (!word) return;
+      cur.push(word);
+      if (SENTENCE_END.test(word)) {
+        out.push(cur.join(" "));
+        cur = [];
+      }
+    });
+    if (cur.length) out.push(cur.join(" "));
+    return out;
   }
 
   // layout wraps paragraphs (arrays of sentences) at a font size and returns
