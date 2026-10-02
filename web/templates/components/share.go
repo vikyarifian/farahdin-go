@@ -15,7 +15,7 @@ type Share struct {
 	Short string // tweet-sized message (X counts the URL separately)
 	URL   string // public app URL
 
-	// Card is drawn by web/static/js/share-card.js into a 1080×1350 image.
+	// Card is drawn by web/static/js/share-card.js into a 1080×1920 image.
 	Card ShareCard
 }
 

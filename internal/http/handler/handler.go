@@ -71,12 +71,12 @@ func (a *App) Routes() http.Handler {
 	mux.Handle("GET /horoscope/{topic}", protected(a.horoscopeForm))
 	mux.Handle("POST /horoscope/{topic}", protected(a.horoscopeSubmit))
 
-	mux.Handle("GET /tarot", protected(a.topics("Tarot", "Tarot", domain.TarotTopics, "/tarot", true)))
+	mux.Handle("GET /tarot", protected(a.topics("Tarot", "Tarot", domain.TarotTopics, "/tarot", false)))
 	mux.Handle("GET /tarot/{topic}", protected(a.tarotSpread))
 	mux.Handle("POST /tarot/{topic}/pick", protected(a.tarotPick))
 	mux.Handle("POST /tarot/{topic}/read", protected(a.tarotRead))
 
-	mux.Handle("GET /clairvoyance", protected(a.topics("Kewaskitaan", "Clairvoyance", domain.ClairvoyanceTopics, "/clairvoyance", true)))
+	mux.Handle("GET /clairvoyance", protected(a.topics("Kewaskitaan", "Clairvoyance", domain.ClairvoyanceTopics, "/clairvoyance", false)))
 	mux.Handle("GET /clairvoyance/{topic}", protected(a.clairvoyanceForm))
 	mux.Handle("POST /clairvoyance/{topic}", protected(a.clairvoyanceSubmit))
 

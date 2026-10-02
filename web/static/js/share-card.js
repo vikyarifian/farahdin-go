@@ -1,4 +1,4 @@
-// Farahdin share image: draws a 1080×1350 (4:5) card on a canvas with the
+// Farahdin share image: draws a 1080×1920 (9:16, phone/story-sized) card on a canvas with the
 // browser's Canvas API (no library) and offers it through the Web Share API
 // or as a download. Content comes from the data-card-* attributes rendered by
 // components.ShareBar; every image is same-origin, so the canvas stays
@@ -6,7 +6,7 @@
 (function () {
   "use strict";
 
-  var W = 1080, H = 1350, PAD = 96;
+  var W = 1080, H = 1920, PAD = 96;
   var BG = "#231d32", GOLD = "#bd9c49", TEXT = "#e9e4f3", MUTED = "#a9a2bb";
   var SERIF = '"EB Garamond", Garamond, Georgia, serif';
   var SMALLCAPS = '"AGaramond SC", ' + SERIF;
@@ -99,20 +99,27 @@
     return x.font;
   }
 
+  // rowHeight is the height a row of images takes at the given height
+  // (scaled down when the row is wider than the content width).
+  function rowScale(imgs, height, gap) {
+    var total = imgs.reduce(function (sum, i) { return sum + i.naturalWidth * height / i.naturalHeight; }, 0) + gap * (imgs.length - 1);
+    return { scale: Math.min(1, (W - 2 * PAD) / total), total: total };
+  }
+
   // row draws images side by side at one height (the frames line up, as on
   // the result sheet) and returns the height used.
   function row(x, imgs, top, height, gap) {
-    var widths = imgs.map(function (i) { return i.naturalWidth * height / i.naturalHeight; });
-    var total = widths.reduce(function (a, b) { return a + b; }, 0) + gap * (imgs.length - 1);
-    var scale = Math.min(1, (W - 2 * PAD) / total);
-    var left = (W - total * scale) / 2;
-    imgs.forEach(function (img, i) {
-      x.drawImage(img, left, top, widths[i] * scale, height * scale);
-      left += (widths[i] + gap) * scale;
+    var r = rowScale(imgs, height, gap);
+    var left = (W - r.total * r.scale) / 2;
+    imgs.forEach(function (img) {
+      var w = img.naturalWidth * height / img.naturalHeight;
+      x.drawImage(img, left, top, w * r.scale, height * r.scale);
+      left += (w + gap) * r.scale;
     });
-    return height * scale;
+    return height * r.scale;
   }
 
+  // wrap breaks text into lines no wider than maxWidth at the current font.
   function wrap(x, text, maxWidth) {
     var words = text.split(/\s+/).filter(Boolean), lines = [], line = "";
     words.forEach(function (w) {
@@ -128,31 +135,66 @@
     return lines;
   }
 
-  // body draws paragraphs from top to bottom limit, ending with "…" when cut.
-  function body(x, text, top, bottom) {
-    var size = 36, lh = 52, gap = 18, maxWidth = W - 2 * PAD;
+  // sentences splits a paragraph at the spaces that follow . ! ? (with any
+  // closing quotes). Dots inside words ("viky.arifian", "1.5") do not split,
+  // so joining the parts with a space gives back the original text.
+  function sentences(p) {
+    return p.split(/(?<=[.!?]["'”’)\]]*)\s+/).map(function (s) { return s.trim(); }).filter(Boolean);
+  }
+
+  // layout wraps paragraphs (arrays of sentences) at a font size and returns
+  // the lines with their y offsets and the total height.
+  function layout(x, paras, size) {
+    var lh = Math.round(size * 1.42), gap = Math.round(size * 0.5), maxWidth = W - 2 * PAD;
     x.font = size + "px " + SERIF;
+    var lines = [], y = 0;
+    paras.forEach(function (p, i) {
+      if (i > 0) y += gap;
+      wrap(x, p.join(" "), maxWidth).forEach(function (l) {
+        lines.push({ text: l, y: y });
+        y += lh;
+      });
+    });
+    return { lines: lines, height: y, size: size };
+  }
+
+  // fitText shows all of the text when it fits in avail: the font shrinks
+  // from 40px to 24px. If even 24px is too big, it keeps as many whole
+  // sentences as fit, so the text never stops in the middle of a sentence.
+  function fitText(x, text, avail) {
+    var paras = (text || "").split("\n").map(sentences).filter(function (p) { return p.length; });
+    if (!paras.length) return null;
+    for (var size = 40; size >= 24; size -= 2) {
+      var l = layout(x, paras, size);
+      if (l.height <= avail) return l;
+    }
+    var kept = [];
+    outer:
+    for (var p = 0; p < paras.length; p++) {
+      for (var s = 0; s < paras[p].length; s++) {
+        var trial = kept.map(function (q) { return q.slice(); });
+        if (s === 0) trial.push([paras[p][s]]); else trial[trial.length - 1].push(paras[p][s]);
+        if (layout(x, trial, 24).height > avail) break outer;
+        kept = trial;
+      }
+    }
+    if (!kept.length) kept = [[paras[0][0]]]; // a single huge sentence: shown as far as it goes
+    return layout(x, kept, 24);
+  }
+
+  function drawText(x, fit, top, bottom) {
+    x.font = fit.size + "px " + SERIF;
     x.fillStyle = TEXT;
     x.textAlign = "left";
-    var y = top + size, paras = (text || "").split("\n");
-    for (var p = 0; p < paras.length; p++) {
-      var lines = wrap(x, paras[p], maxWidth);
-      for (var i = 0; i < lines.length; i++) {
-        var last = y + lh > bottom;
-        var line = lines[i];
-        if (last && (i < lines.length - 1 || p < paras.length - 1)) {
-          while (line && x.measureText(line + "…").width > maxWidth) line = line.replace(/\s*\S+$/, "");
-          line = line.replace(/[\s.,;:!?-]+$/, "");
-          x.fillText(line + "…", PAD, y);
-          return;
-        }
-        x.fillText(line, PAD, y);
-        y += lh;
-        if (y > bottom) return;
-      }
-      y += gap;
-    }
+    fit.lines.forEach(function (l) {
+      var baseline = top + l.y + fit.size;
+      if (baseline <= bottom) x.fillText(l.text, PAD, baseline);
+    });
   }
+
+  // Vertical rhythm of the content block (heights include the gap below).
+  var BRAND_H = 110, HEADING_H = 84, HIGHLIGHT_H = 56, MEDIA_GAP = 36, HEARTS_H = 60;
+  var FOOTER_H = 56 + 116; // gap above the rule + rule, call to action and address
 
   function draw(d, a) {
     var canvas = document.createElement("canvas");
@@ -160,27 +202,29 @@
     canvas.height = H;
     var x = canvas.getContext("2d");
 
-    // Background: theme colour, then — clipped to the inner frame so it never
-    // runs over the gold border — the Farahdin photo, lowered a little and
-    // faded out, and a soft glow.
+    // Background: theme colour, then — clipped to the inner frame — the
+    // Farahdin photo centred between the top and the middle of the card,
+    // faded out at both ends, and a soft glow.
     x.fillStyle = BG;
     x.fillRect(0, 0, W, H);
     x.save();
     roundRect(x, 52, 52, W - 104, H - 104, 18);
     x.clip();
     if (a.bg) {
-      var top = 64;
       var bh = W * a.bg.naturalHeight / a.bg.naturalWidth;
-      x.globalAlpha = 0.2;
+      var top = Math.round(H * 0.32 - bh / 2);
+      x.globalAlpha = 0.28;
       x.drawImage(a.bg, 0, top, W, bh);
       x.globalAlpha = 1;
-      var fade = x.createLinearGradient(0, top + bh * 0.3, 0, top + bh);
-      fade.addColorStop(0, "rgba(35,29,50,0)");
+      var fade = x.createLinearGradient(0, top, 0, top + bh);
+      fade.addColorStop(0, BG);
+      fade.addColorStop(0.18, "rgba(35,29,50,0)");
+      fade.addColorStop(0.6, "rgba(35,29,50,0)");
       fade.addColorStop(1, BG);
       x.fillStyle = fade;
-      x.fillRect(0, top, W, bh + 1);
+      x.fillRect(0, top - 1, W, bh + 2);
     }
-    var glow = x.createRadialGradient(W / 2, H * 0.42, 40, W / 2, H * 0.42, W * 0.75);
+    var glow = x.createRadialGradient(W / 2, H * 0.45, 40, W / 2, H * 0.45, W * 0.8);
     glow.addColorStop(0, "rgba(189,156,73,0.12)");
     glow.addColorStop(1, "rgba(189,156,73,0)");
     x.fillStyle = glow;
@@ -197,56 +241,72 @@
     roundRect(x, 50, 50, W - 100, H - 100, 20);
     x.stroke();
 
-    // Brand and heading.
+    // Content block (brand, heading, media, text and the footer line with
+    // the call to action): measure it, then centre it inside the frame.
+    var areaTop = 110, areaBottom = H - 110;
+    var media = null;
+    if (a.cards.length) media = { imgs: a.cards, h: 340, gap: 28 };
+    else if (a.chart) media = { imgs: [a.chart], h: 410, gap: 0 };
+    else if (a.icons.length) media = { imgs: a.icons, h: 150, gap: 48 };
+    else if (a.decor) media = { imgs: [a.decor], h: 190, gap: 0 };
+    var mediaH = media ? media.h * rowScale(media.imgs, media.h, media.gap).scale : 0;
+    var love = Number(d.cardLove);
+    var hearts = [];
+    if (love > 0 && a.heart) {
+      for (var i = 1; i <= 5; i++) hearts.push(i <= love ? a.heart : (a.noheart || a.heart));
+    }
+    var heartsH = hearts.length ? HEARTS_H * rowScale(hearts, HEARTS_H, 14).scale : 0;
+
+    var head = BRAND_H + HEADING_H + (d.cardHighlight ? HIGHLIGHT_H : 0);
+    var mid = (mediaH ? MEDIA_GAP + mediaH : 0) + (heartsH ? MEDIA_GAP + heartsH : 0) + MEDIA_GAP;
+    var text = fitText(x, d.cardBody, areaBottom - areaTop - head - mid - FOOTER_H);
+    var textH = text ? text.height : 0;
+    var total = head + mid + textH + FOOTER_H;
+    var y = areaTop + Math.max(0, Math.round((areaBottom - areaTop - total) / 2));
+
     x.textAlign = "center";
     x.fillStyle = GOLD;
     x.font = "96px Javassoul, " + SERIF;
-    x.fillText("Farahdin", W / 2, 176);
-    var y = 176 + 84;
+    x.fillText("Farahdin", W / 2, y + 96);
+    y += BRAND_H;
     x.fillStyle = "#ffffff";
     fit(x, d.cardHeading, SMALLCAPS, 56, W - 2 * PAD, 34);
-    x.fillText(d.cardHeading, W / 2, y);
+    x.fillText(d.cardHeading, W / 2, y + 56);
+    y += HEADING_H;
     if (d.cardHighlight) {
-      y += 56;
       x.fillStyle = GOLD;
       fit(x, d.cardHighlight, SERIF, 36, W - 2 * PAD, 24);
-      x.fillText(d.cardHighlight, W / 2, y);
+      x.fillText(d.cardHighlight, W / 2, y + 36);
+      y += HIGHLIGHT_H;
     }
-    y += 40;
-
-    // Media: tarot cards, matrix chart, zodiac signs or the feature illustration.
-    var used = 0;
-    if (a.cards.length) used = row(x, a.cards, y, 400, 32);
-    else if (a.chart) used = row(x, [a.chart], y, 470, 0);
-    else if (a.icons.length) used = row(x, a.icons, y, 180, 56);
-    else if (a.decor) used = row(x, [a.decor], y, 220, 0);
-    if (used) y += used + 28;
-
-    var love = Number(d.cardLove);
-    if (love > 0 && a.heart) {
-      var hearts = [];
-      for (var i = 1; i <= 5; i++) hearts.push(i <= love ? a.heart : (a.noheart || a.heart));
-      y += row(x, hearts, y, 72, 16) + 28;
+    if (media) {
+      y += MEDIA_GAP;
+      y += row(x, media.imgs, y, media.h, media.gap);
     }
+    if (heartsH) {
+      y += MEDIA_GAP;
+      y += row(x, hearts, y, HEARTS_H, 14);
+    }
+    y += MEDIA_GAP;
+    if (text) drawText(x, text, y, areaBottom - FOOTER_H);
+    y += textH;
 
-    // Footer.
-    var footer = H - 176;
-    x.strokeStyle = "rgba(189,156,73,0.45)";
+    // Footer text: a short gold rule, the call to action and the address,
+    // right after the reading (not pinned to the bottom of the card).
+    y += 56;
+    x.strokeStyle = "rgba(189,156,73,0.5)";
     x.lineWidth = 1.5;
     x.beginPath();
-    x.moveTo(PAD, footer);
-    x.lineTo(W - PAD, footer);
+    x.moveTo(W / 2 - 120, y);
+    x.lineTo(W / 2 + 120, y);
     x.stroke();
     x.textAlign = "center";
     x.fillStyle = GOLD;
     fit(x, d.cardCta, SMALLCAPS, 40, W - 2 * PAD, 26);
-    x.fillText(d.cardCta, W / 2, footer + 66);
+    x.fillText(d.cardCta, W / 2, y + 62);
     x.fillStyle = MUTED;
     x.font = "30px " + SERIF;
-    x.fillText(d.cardHost, W / 2, footer + 112);
-
-    // Reading text in the space that is left.
-    body(x, d.cardBody, y, footer - 60);
+    x.fillText(d.cardHost, W / 2, y + 106);
     return canvas;
   }
 

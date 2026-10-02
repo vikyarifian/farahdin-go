@@ -70,16 +70,17 @@ type featureCard struct {
 }
 
 var featureCards = []featureCard{
+	// Descriptions shortened from the source app to fit two lines (D-35).
 	{"/primbon", "images/icon/primbon-icon.png", "Primbon", "Primbon",
-		"Hitung weton, karakter, perjodohan dan peruntungan", "Calculate weton, character, compatibility and fortune"},
+		"Weton, karakter, jodoh dan peruntungan", "Weton, character, match and fortune"},
 	{"/horoscope", "images/icon/horoscope-icon.png", "Horoskop", "Horoscope",
-		"Temukan ramalan zodiak harian dan kompabilitas kamu", "Find your daily zodiac predictions and compatibility"},
+		"Ramalan zodiak harian dan kecocokan", "Daily zodiac forecast and compatibility"},
 	{"/tarot", "images/icon/tarot-icon.png", "Tarot", "Tarot",
-		"Tarik kartu untuk mendapatkan petunjuk dari semesta", "Pull cards to get clues from the universe"},
+		"Tarik kartu, temukan petunjuk semesta", "Pull cards for clues from the universe"},
 	{"/clairvoyance", "images/icon/clair-icon.png", "Kewaskitaan", "Clairvoyance",
-		"Buka bacaan batin dan pesan dari energi gaib", "Open inner readings and messages from supernatural energies"},
+		"Bacaan batin dan pesan dari alam gaib", "Inner readings and mystical messages"},
 	{"/matrix-destiny", "images/icon/matrix-destiny-icon.png", "Matriks Takdir", "Matrix Destiny",
-		"Ungkap pola kehidupan, bakat dan tantangan melalui simbol angka", "Reveal life patterns, talents and challenges through number symbols"},
+		"Pola hidup dan bakat lewat simbol angka", "Life patterns and talents in numbers"},
 }
 
 // Home ports app/(tabs)/index.tsx.
@@ -113,18 +114,20 @@ templ Home(v HomeView) {
 				</form>
 			</details>
 		</div>
-		<div class="relative flex aspect-[512/341] w-full items-end justify-center overflow-hidden rounded-lg">
-			<img src={ web.Asset("images/hero.png") } alt="" width="512" height="341" fetchpriority="high" class="absolute inset-0 size-full object-contain opacity-95"/>
+		// 4:3 is taller than the 3:2 image, so it fills the height (the top of the
+		// circle stays whole) and only the transparent side margins are cropped.
+		<div class="relative -mx-2.5 flex aspect-[4/3] items-end justify-center overflow-hidden">
+			<img src={ web.Asset("images/hero.png") } alt="" width="512" height="341" fetchpriority="high" class="absolute inset-0 size-full object-cover opacity-95"/>
 			<p class="relative font-javassoul text-[60px] leading-tight text-primary" aria-hidden="true">Farahdin</p>
 		</div>
-		<ul class="mt-12 flex flex-col items-center gap-5 pb-6">
+		<ul class="mt-1 flex flex-col items-center gap-5 pb-6">
 			for _, c := range featureCards {
 				<li class="w-[90%]">
 					<a href={ templ.SafeURL(c.href) } class="flex min-h-[100px] items-center gap-4 rounded-2xl border border-primary bg-backdrop py-2.5 pl-5 pr-3 transition hover:bg-backdrop/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
 						<img src={ web.Asset(c.icon) } alt="" class="size-[65px] shrink-0 rounded-2xl"/>
 						<span class="flex flex-col">
 							<span class="font-garamond-sc text-[26px] font-semibold leading-tight">{ i18n.T(ctx, c.titleID, c.titleEN) }</span>
-							<span class="font-garamond text-lg leading-snug">{ i18n.T(ctx, c.descID, c.descEN) }</span>
+							<span class="line-clamp-2 font-garamond text-lg leading-snug">{ i18n.T(ctx, c.descID, c.descEN) }</span>
 						</span>
 					</a>
 				</li>
@@ -206,7 +209,7 @@ templ EditProfile(v EditProfileView) {
 
 // EditProfileForm is swapped in place after saving.
 templ EditProfileForm(v EditProfileView) {
-	<form id="profile-form" method="post" action="/profile" hx-post="/profile" hx-target="this" hx-swap="outerHTML" hx-disabled-elt="find button[type=submit]" class="p-4" novalidate>
+	<form id="profile-form" method="post" action="/profile" hx-post="/profile" hx-target="this" hx-swap="outerHTML" hx-disabled-elt="find button[type=submit]" class="px-4 pb-4 pt-1" novalidate>
 		if v.Saved {
 			<p role="status" class="mb-3 rounded-lg border border-primary/60 bg-primary/10 p-3 text-sm text-primary">{ i18n.T(ctx, "Berhasil disimpan", "Success") }</p>
 		}
@@ -227,9 +230,9 @@ templ EditProfileForm(v EditProfileView) {
 		@components.Field("birthplace", i18n.T(ctx, "Alamat", "Location"), v.Errors["birthplace"]) {
 			@components.TextInput("birthplace", "birthplace", v.Birthplace, i18n.T(ctx, "Masukan Alamat", "Input Location"), templ.Attributes{"maxlength": "200"})
 		}
-		<fieldset class="mb-2.5">
-			<legend class="p-1 text-lg font-bold text-primary">{ i18n.T(ctx, "Jenis Kelamin", "Gender") }</legend>
-			<div class="flex gap-6 p-1">
+		<fieldset class="mb-2">
+			<legend class="px-1 pb-0.5 text-base font-bold text-primary">{ i18n.T(ctx, "Jenis Kelamin", "Gender") }</legend>
+			<div class="flex gap-6 px-1">
 				for _, g := range []string{"Male", "Female"} {
 					<label class="flex min-h-11 cursor-pointer items-center gap-2">
 						<input type="radio" name="gender" value={ g } checked?={ v.Gender == g } class="size-5 accent-primary"/>
@@ -290,7 +293,7 @@ templ Creator() {
 				href="https://trakteer.id/vikyarifian"
 				target="_blank"
 				rel="noopener"
-				class="mt-3 inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-md bg-primary px-4 py-2 font-medium text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+				class="mt-3 inline-flex min-h-11 items-center justify-center gap-2 self-center rounded-md bg-primary px-4 py-2 font-medium text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
 			>
 				@components.Icon("cafe-outline", "size-5")
 				{ i18n.T(ctx, "Traktir di Trakteer", "Treat me on Trakteer") }
@@ -303,6 +306,11 @@ templ Creator() {
 			<p class="flex items-center gap-2 py-2">
 				@components.Icon("globe-outline", "size-6 text-primary")
 				<a href="https://profile.vikyarifian.web.id" rel="noopener" target="_blank" class="underline-offset-4 hover:underline">https://profile.vikyarifian.web.id</a>
+			</p>
+			@components.Divider()
+			<p class="flex items-center gap-2 py-2">
+				@components.Icon("logo-github", "size-6 text-primary")
+				<a href="https://github.com/vikyarifian" rel="noopener" target="_blank" class="underline-offset-4 hover:underline">https://github.com/vikyarifian</a>
 			</p>
 			@components.Divider()
 			<p class="flex items-center gap-2 py-2">

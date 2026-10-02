@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/vikyarifian/farahdin-go/internal/domain"
@@ -17,7 +18,7 @@ import (
 const (
 	shareExcerpt      = 260
 	shareExcerptShort = 140
-	shareCardText     = 1400
+	shareCardText     = 3000
 )
 
 // shareInput describes one result for sharing.
@@ -76,7 +77,9 @@ func (a *App) share(r *http.Request, in shareInput) components.Share {
 	}
 }
 
-// cardBody keeps whole paragraphs (one per line) up to shareCardText runes.
+// cardBody keeps whole paragraphs (one per line) up to shareCardText runes;
+// a paragraph that does not fit is cut after its last complete sentence,
+// never in the middle of one. share-card.js fits the result to the image.
 func cardBody(lines []string) string {
 	var out []string
 	n := 0
@@ -85,14 +88,34 @@ func cardBody(lines []string) string {
 		if l == "" {
 			continue
 		}
-		if n+len([]rune(l)) > shareCardText {
-			out = append(out, components.Excerpt([]string{l}, max(shareCardText-n, 40)))
+		if size := len([]rune(l)); n+size > shareCardText {
+			if head := wholeSentences(l, shareCardText-n); head != "" {
+				out = append(out, head)
+			}
 			break
 		}
 		out = append(out, l)
 		n += len([]rune(l))
 	}
 	return strings.Join(out, "\n")
+}
+
+// sentenceEnd matches the end of a sentence: . ! ? (optionally closed by a
+// quote or bracket) followed by a space or the end of the text.
+var sentenceEnd = regexp.MustCompile(`[.!?]["'”’)\]]*(\s|$)`)
+
+// wholeSentences returns the longest prefix of s made of complete sentences
+// that is at most limit runes, or "" when not even one sentence fits.
+func wholeSentences(s string, limit int) string {
+	best := ""
+	for _, loc := range sentenceEnd.FindAllStringIndex(s, -1) {
+		head := strings.TrimSpace(s[:loc[1]])
+		if len([]rune(head)) > limit {
+			break
+		}
+		best = head
+	}
+	return best
 }
 
 // loveHighlight ports the Primbon "Jodoh" heart meter into words.

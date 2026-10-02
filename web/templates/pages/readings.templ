@@ -114,12 +114,12 @@ func primbonDateLabel(ctx context.Context, topic int) string {
 // Horoscope ports the Horoscope topic form.
 templ Horoscope(v HoroscopeView) {
 	@layouts.Feature(i18n.T(ctx, "Horoskop", "Horoscope"), "/horoscope", layouts.TabHome) {
-		<div class="mb-4 flex flex-col items-center">
-			<div class="relative flex h-[220px] w-full items-center justify-center">
+		<div class="mb-2 flex flex-col items-center">
+			<div class="relative flex h-[120px] w-full items-center justify-center">
 				<img src={ web.Asset("images/icon/horoscope-icon-header.png") } alt="" class="absolute inset-0 size-full object-contain"/>
 				@HoroscopeSign(v.Sign, true, false)
 			</div>
-			<h2 class="mt-4 font-garamond-sc text-[32px]">{ v.Topic.Label(i18n.Lang(ctx)) }</h2>
+			<h2 class="mt-1 font-garamond-sc text-[26px] leading-tight">{ v.Topic.Label(i18n.Lang(ctx)) }</h2>
 			@HoroscopeSign(v.Sign, false, false)
 		</div>
 		@readingForm("/horoscope/" + strconv.Itoa(v.Topic.Key)) {
@@ -147,13 +147,13 @@ templ HoroscopeSign(sign string, icon bool, oob bool) {
 	if icon {
 		<span id="sign-icon" class="relative" hx-swap-oob={ oobAttr(oob) }>
 			if sign != "" {
-				<img src={ web.Asset("images/icon/zodiac/" + strings.ToLower(sign) + ".png") } alt="" class="size-[60px] object-contain"/>
+				<img src={ web.Asset("images/icon/zodiac/" + strings.ToLower(sign) + ".png") } alt="" class="size-[40px] object-contain"/>
 			}
 		</span>
 	} else {
 		<div id="sign-label" class="flex flex-col items-center" aria-live="polite" hx-swap-oob={ oobAttr(oob) }>
-			<p class="-mb-2.5 font-garamond-sc text-[32px]">{ sign }</p>
-			<p class="p-1 text-sm text-primary">{ domain.ZodiacDate(sign) }</p>
+			<p class="font-garamond-sc text-[22px] leading-tight">{ sign }</p>
+			<p class="text-sm text-primary">{ domain.ZodiacDate(sign) }</p>
 		</div>
 	}
 }

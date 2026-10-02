@@ -58,15 +58,15 @@ templ TopicGrid(topics []domain.Topic, baseHref string, large bool) {
 // FeatureHero is the header illustration and topic title above a form.
 templ FeatureHero(image string, title string) {
 	<div class="flex flex-col items-center">
-		<img src={ web.Asset(image) } alt="" class="h-[220px] w-full object-contain"/>
-		<h2 class="p-1 font-garamond-sc text-[32px] text-white">{ title }</h2>
+		<img src={ web.Asset(image) } alt="" class="h-[120px] w-full object-contain"/>
+		<h2 class="px-1 pb-1 font-garamond-sc text-[26px] leading-tight text-white">{ title }</h2>
 	</div>
 }
 
 // Field is a labelled form control with an optional error message.
 templ Field(id string, label string, errMsg string) {
-	<div class="mb-2.5">
-		<label for={ id } class="block p-1 text-lg font-bold text-primary">{ label }</label>
+	<div class="mb-2">
+		<label for={ id } class="block px-1 pb-0.5 text-base font-bold text-primary">{ label }</label>
 		{ children... }
 		if errMsg != "" {
 			<p id={ id + "-error" } class="mt-1 text-sm text-red-400">{ errMsg }</p>
@@ -106,7 +106,7 @@ templ DateInput(id string, name string, value string, max string, attrs templ.At
 
 // SubmitButton is the gold primary button with an HTMX loading spinner.
 templ SubmitButton(label string) {
-	<button type="submit" class="mt-2.5 inline-flex min-h-11 min-w-28 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-lg font-medium text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60">
+	<button type="submit" class="mt-1.5 inline-flex min-h-11 min-w-28 items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-lg font-medium text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60">
 		<span class="htmx-indicator spinner" aria-hidden="true"></span>
 		<span>{ label }</span>
 	</button>
@@ -146,7 +146,7 @@ templ resultSheet(title string, subtitle string, closeHref string, reload bool, 
 		}
 	>
 		<div class="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 pb-10">
-			<div class="flex h-12 items-center justify-between">
+			<div class="mt-4 flex h-12 items-center justify-between">
 				<a href={ templ.SafeURL(closeHref) } data-close-sheet class="py-2 pr-4 text-lg text-primary focus-visible:outline-2 focus-visible:outline-primary">
 					{ i18n.T(ctx, "Selesai", "Done") }
 				</a>
@@ -268,7 +268,7 @@ templ sharePanel(s Share) {
 			</button>
 		</div>
 		<div data-share-image-area hidden>
-			<div class="mx-auto mt-3 flex aspect-[4/5] w-48 items-center justify-center overflow-hidden rounded-lg bg-black/30">
+			<div class="mx-auto mt-3 flex aspect-[9/16] w-40 items-center justify-center overflow-hidden rounded-lg bg-black/30">
 				<span class="spinner" data-share-loading aria-hidden="true"></span>
 				<img data-share-preview hidden alt={ i18n.T(ctx, "Pratinjau gambar hasil", "Preview of the result image") } class="size-full object-contain"/>
 			</div>

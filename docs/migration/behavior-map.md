@@ -153,7 +153,7 @@ Errors: source `alert()`s validation and leaves the spinner running; reading fai
 **Primary:** Instagram and TikTok share the generated image file via the system share sheet (no web share links exist for them); otherwise the image is downloaded with an upload hint.
 **Message:** `🔮 <feature> · <topic>` + optional highlight (Primbon Jodoh love score, Matrix purposes) + excerpt + "Get your own reading on Farahdin:" + `BASE_URL/`.
 **Channels:** native share sheet (shown only where `navigator.share` exists), WhatsApp, Telegram, X, Facebook (URL only), copy to clipboard (shown only in secure contexts).
-**Image:** "Image" opens a preview of a 1080×1350 card (Canvas API, ~0.2 s, ~150–250 KB JPEG) with "Share image" (only where `navigator.canShare({files})` is true) and "Download".
+**Image:** "Image" opens a preview of a 1080×1920 card (Canvas API, ~0.2 s, ~250–400 KB JPEG) with "Share image" (only where `navigator.canShare({files})` is true) and "Download".
 **Without JS:** the four links still work. **Privacy:** nothing is stored or published by the app; the user chooses what to send.
 **Not shared:** validation/upstream errors, Tarot before the card is read.
 

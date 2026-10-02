@@ -359,3 +359,20 @@ A bright day ahead.True Love Tarot Reading</div></body></html>`
 		t.Error("validation errors must not offer sharing")
 	}
 }
+
+func TestCardBodyCutsAtSentenceEnd(t *testing.T) {
+	long := strings.Repeat("Bintang bersinar terang malam ini. ", 120) // ~4200 runes
+	got := cardBody([]string{"Judul", long})
+	if !strings.HasSuffix(got, "malam ini.") {
+		t.Errorf("must end on a full sentence, got …%q", got[len(got)-30:])
+	}
+	if n := len([]rune(got)); n > shareCardText {
+		t.Errorf("len = %d, limit %d", n, shareCardText)
+	}
+	if wholeSentences("No end here", 100) != "" {
+		t.Error("a text without a sentence end must not be cut mid-sentence")
+	}
+	if got := wholeSentences(`He said "go." Then left! Why?`, 100); got != `He said "go." Then left! Why?` {
+		t.Errorf("wholeSentences = %q", got)
+	}
+}

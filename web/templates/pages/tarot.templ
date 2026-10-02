@@ -40,7 +40,7 @@ templ Tarot(v TarotView) {
 			} else {
 				<fieldset class="w-full">
 					<legend class="sr-only">{ i18n.T(ctx, "Pilih satu kartu", "Pick one card") }</legend>
-					<ul class="flex flex-wrap justify-center pl-5 pr-[54px] pt-10">
+					<ul class="flex flex-wrap justify-center pl-5 pr-[54px] pt-8">
 						for i, c := range v.Cards {
 							<li class="-ml-px w-[7.36%] min-h-[100px]">
 								<label class="block cursor-pointer">
@@ -58,7 +58,7 @@ templ Tarot(v TarotView) {
 					@components.Alert(v.Error)
 				</div>
 			}
-			<div class="mt-8">
+			<div class="mt-4">
 				if v.Topic.Key == 2 {
 					@components.SubmitButton(i18n.T(ctx, "Baca", "Read"))
 				} else {
@@ -105,10 +105,10 @@ templ TarotReadingSwap(s TarotSheet) {
 // TarotReading is the body of the sheet; "Read Card" replaces it in place.
 templ TarotReading(s TarotSheet) {
 	<div id="tarot-reading">
-		<div class="mx-2.5 mb-10 flex justify-center gap-4 pt-5">
+		<div class="mx-2.5 mb-4 flex justify-center gap-4 pt-3">
 			switch s.Topic.Key {
 				case 1:
-					@tarotImage(service.TarotCardImage(s.Card), "w-[88%]")
+					@singleImage(service.TarotCardImage(s.Card))
 				case 2:
 					<figure class="flex flex-col items-center">
 						@pairImage(service.TarotCardImage(s.You))
@@ -126,7 +126,7 @@ templ TarotReading(s TarotSheet) {
 							@pairImage(service.TarotExtraImage(s.Topic.Key, s.Card))
 						</div>
 					} else {
-						@tarotImage(service.TarotExtraImage(s.Topic.Key, s.Card), "w-[88%]")
+						@singleImage(service.TarotExtraImage(s.Topic.Key, s.Card))
 					}
 			}
 		</div>
@@ -162,6 +162,8 @@ templ pairImage(src string) {
 	<img src={ src } alt="" class="h-[min(58vw,20rem)] w-auto"/>
 }
 
-templ tarotImage(src string, class string) {
-	<img src={ src } alt="" class={ "mx-auto min-h-[160px] object-contain", class }/>
+// singleImage is the one card or illustration shown above "Read Card". Its
+// height is capped (40% of the screen) so the button stays on screen.
+templ singleImage(src string) {
+	<img src={ src } alt="" class="mx-auto h-[min(40dvh,22rem)] w-auto object-contain"/>
 }
