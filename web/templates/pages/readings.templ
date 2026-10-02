@@ -41,7 +41,7 @@ templ Result(v ResultView) {
 	if v.Error != "" {
 		@components.Alert(v.Error)
 	} else if v.Show {
-		@components.ResultSheet(v.Title, v.Subtitle, v.CloseHref) {
+		@components.ResultSheet(v.Title, v.Subtitle, v.CloseHref, v.Share) {
 			@components.Lines(v.Reading.Lines)
 			if v.Reading.Love > 0 {
 				<div class="flex justify-center gap-1 p-2.5" role="img" aria-label={ strconv.Itoa(v.Reading.Love) + "/5" }>

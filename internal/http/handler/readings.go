@@ -10,6 +10,7 @@ import (
 	"github.com/vikyarifian/farahdin-go/internal/http/response"
 	"github.com/vikyarifian/farahdin-go/internal/i18n"
 	"github.com/vikyarifian/farahdin-go/internal/service"
+	"github.com/vikyarifian/farahdin-go/web"
 	"github.com/vikyarifian/farahdin-go/web/templates/components"
 	"github.com/vikyarifian/farahdin-go/web/templates/pages"
 )
@@ -35,12 +36,21 @@ func (a *App) syncBirthday(r *http.Request, u *domain.User, birthday string) {
 	}
 }
 
-func readingResult(title, subtitle, closeHref string, reading service.Reading, err error, r *http.Request) pages.ResultView {
+// readingResult turns a reading into the result sheet view; in describes the
+// result for sharing (its Lines, Love and love highlight come from reading).
+func (a *App) readingResult(r *http.Request, closeHref string, in shareInput, reading service.Reading, err error) pages.ResultView {
 	if err != nil {
 		return pages.ResultView{Error: readingError(r, err)}
 	}
 	reading.Lines = service.CleanLines(reading.Lines)
-	return pages.ResultView{Title: title, Subtitle: subtitle, CloseHref: closeHref, Reading: reading, Show: true}
+	in.Lines, in.Love = reading.Lines, reading.Love
+	if in.Highlight == "" {
+		in.Highlight = loveHighlight(r, reading.Love)
+	}
+	return pages.ResultView{
+		Title: in.Title, Subtitle: in.Subtitle, CloseHref: closeHref, Reading: reading, Show: true,
+		Share: a.share(r, in),
+	}
 }
 
 // --- Primbon ---
@@ -96,7 +106,9 @@ func (a *App) primbonSubmit(w http.ResponseWriter, r *http.Request) {
 		reading, err := a.Readings.Primbon(r.Context(), t.Key, service.PrimbonInput{
 			Name: v.Name, Dream: v.Dream, Partner: v.Partner, Birthday: birthday, Date: date,
 		}, lang(r))
-		v.Result = readingResult("Primbon", t.Label(lang(r)), "/primbon/"+strconv.Itoa(t.Key), reading, err, r)
+		v.Result = a.readingResult(r, "/primbon/"+strconv.Itoa(t.Key), shareInput{
+			Title: "Primbon", Subtitle: t.Label(lang(r)), Decor: web.Asset("images/icon/primbon-icon-header.png"),
+		}, reading, err)
 	}
 	fragmentOrPage(w, r, pages.Result(v.Result), pages.Primbon(v))
 }
@@ -147,7 +159,13 @@ func (a *App) horoscopeSubmit(w http.ResponseWriter, r *http.Request) {
 			subtitle += " & " + v.PartnerSign
 		}
 		reading, err := a.Readings.Horoscope(r.Context(), t.Key, in, lang(r))
-		v.Result = readingResult(i18n.T(r.Context(), "Horoskop", "Horoscope"), subtitle, "/horoscope/"+strconv.Itoa(t.Key), reading, err, r)
+		icons := []string{zodiacIcon(v.Sign)}
+		if t.Key == 6 {
+			icons = append(icons, zodiacIcon(v.PartnerSign))
+		}
+		v.Result = a.readingResult(r, "/horoscope/"+strconv.Itoa(t.Key), shareInput{
+			Title: i18n.T(r.Context(), "Horoskop", "Horoscope"), Subtitle: subtitle, Icons: icons,
+		}, reading, err)
 	}
 	fragmentOrPage(w, r, pages.Result(v.Result), pages.Horoscope(v))
 }
@@ -180,7 +198,10 @@ func (a *App) clairvoyanceSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	v := pages.ClairvoyanceView{Topic: t, Name: strings.TrimSpace(r.FormValue("name"))}
 	reading, err := a.Readings.Clairvoyance(r.Context(), t.Key, v.Name, lang(r))
-	v.Result = readingResult(i18n.T(r.Context(), "Kewaskitaan", "Clairvoyance"), t.Label(lang(r)), "/clairvoyance/"+strconv.Itoa(t.Key), reading, err, r)
+	v.Result = a.readingResult(r, "/clairvoyance/"+strconv.Itoa(t.Key), shareInput{
+		Title: i18n.T(r.Context(), "Kewaskitaan", "Clairvoyance"), Subtitle: t.Label(lang(r)),
+		Decor: web.Asset("images/icon/clair-icon-header.png"),
+	}, reading, err)
 	fragmentOrPage(w, r, pages.Result(v.Result), pages.Clairvoyance(v))
 }
 
@@ -246,6 +267,7 @@ func (a *App) tarotRead(w http.ResponseWriter, r *http.Request) {
 				sheet.Error = readingError(r, err)
 			} else {
 				sheet.Read, sheet.Reading = true, service.Reading{Lines: service.CleanLines(reading.Lines)}
+				sheet.Share = a.share(r, shareInput{Title: "Tarot", Subtitle: t.Label(lang(r)), Lines: sheet.Reading.Lines, Images: tarotShareImages(sheet)})
 			}
 		}
 		v.Sheet = &sheet
@@ -264,9 +286,10 @@ func (a *App) tarotRead(w http.ResponseWriter, r *http.Request) {
 		sheet.Error = readingError(r, err)
 	} else {
 		sheet.Read, sheet.Reading = true, service.Reading{Lines: service.CleanLines(reading.Lines)}
+		sheet.Share = a.share(r, shareInput{Title: "Tarot", Subtitle: t.Label(lang(r)), Lines: sheet.Reading.Lines, Images: tarotShareImages(sheet)})
 	}
 	v.Sheet = &sheet
-	fragmentOrPage(w, r, pages.TarotReading(sheet), pages.Tarot(v))
+	fragmentOrPage(w, r, pages.TarotReadingSwap(sheet), pages.Tarot(v))
 }
 
 // --- Matrix Destiny ---
@@ -296,6 +319,30 @@ func (a *App) matrixSubmit(w http.ResponseWriter, r *http.Request) {
 		v.Error = readingError(r, err)
 	} else {
 		v.Result = &res
+		v.Share = a.share(r, shareInput{
+			Title: i18n.T(r.Context(), "Matriks Takdir", "Matrix Destiny"), Subtitle: v.Topic.Label(lang(r)),
+			Highlight: matrixHighlight(r, res.Matrix), Lines: service.CleanLines(res.Reading.Lines), Chart: true,
+		})
 	}
 	fragmentOrPage(w, r, pages.MatrixResult(v), pages.Matrix(v))
+}
+
+// zodiacIcon is the zodiac image used on the share card.
+func zodiacIcon(sign string) string {
+	if sign == "" {
+		return ""
+	}
+	return web.Asset("images/icon/zodiac/" + strings.ToLower(sign) + ".png")
+}
+
+// tarotShareImages are the images shown on the tarot share card, as on the sheet.
+func tarotShareImages(s pages.TarotSheet) []string {
+	switch s.Topic.Key {
+	case 1:
+		return []string{service.TarotCardImage(s.Card)}
+	case 2:
+		return []string{service.TarotCardImage(s.You), service.TarotCardImage(s.Partner)}
+	default:
+		return []string{service.TarotCardImage(s.Card), service.TarotExtraImage(s.Topic.Key, s.Card)}
+	}
 }

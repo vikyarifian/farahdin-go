@@ -89,10 +89,17 @@ templ TarotResult(s TarotSheet) {
 	if s.Topic.Key == 2 && s.Error != "" {
 		@components.Alert(s.Error)
 	} else {
-		@components.ResultSheetReload("Tarot", s.Topic.Label(i18n.Lang(ctx)), "/tarot/"+strconv.Itoa(s.Topic.Key)) {
+		@components.ResultSheetReload("Tarot", s.Topic.Label(i18n.Lang(ctx)), "/tarot/"+strconv.Itoa(s.Topic.Key), s.Share) {
 			@TarotReading(s)
 		}
 	}
+}
+
+// TarotReadingSwap answers "Read Card" over HTMX: the new sheet body plus the
+// share button, which only exists once there is a reading.
+templ TarotReadingSwap(s TarotSheet) {
+	@TarotReading(s)
+	@components.ShareSlot(s.Share, true)
 }
 
 // TarotReading is the body of the sheet; "Read Card" replaces it in place.

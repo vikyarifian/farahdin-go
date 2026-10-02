@@ -4,6 +4,7 @@ package pages
 import (
 	"github.com/vikyarifian/farahdin-go/internal/domain"
 	"github.com/vikyarifian/farahdin-go/internal/service"
+	"github.com/vikyarifian/farahdin-go/web/templates/components"
 )
 
 // LoginView is the sign-in screen.
@@ -39,6 +40,7 @@ type ResultView struct {
 	Reading                    service.Reading
 	Error                      string
 	Show                       bool
+	Share                      components.Share
 }
 
 // PrimbonView is a Primbon topic form.
@@ -83,6 +85,7 @@ type TarotSheet struct {
 	Read    bool
 	Reading service.Reading
 	Error   string
+	Share   components.Share
 }
 
 // MatrixView is the Matrix Destiny form.
@@ -93,4 +96,5 @@ type MatrixView struct {
 	Today    string
 	Error    string
 	Result   *service.MatrixResult
+	Share    components.Share
 }

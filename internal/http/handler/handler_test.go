@@ -315,3 +315,47 @@ func TestTarotSheetReloadsSpreadOnClose(t *testing.T) {
 		t.Errorf("tab order must be Home, Creator, Profile (%d, %d, %d)", home, creator, profile)
 	}
 }
+
+func TestResultsOfferSharing(t *testing.T) {
+	upstream := `<html><body><div class="grid">Daily Love Tarot Reading The Lovers
+A bright day ahead.True Love Tarot Reading</div></body></html>`
+	ta := newTestApp(t, upstream)
+	c := ta.client(t)
+	ta.signIn(t, c)
+
+	_, body := ta.do(t, c, "POST", "/tarot/1/read", url.Values{"card": {"6"}, "sheet": {"1"}}, map[string]string{"HX-Request": "true"})
+	for _, want := range []string{"data-share", "https://wa.me/?text=", "twitter.com/intent/tweet", "facebook.com/sharer", "t.me/share/url",
+		url.QueryEscape("A bright day ahead."), url.QueryEscape("http://example.test/")} {
+		if !strings.Contains(body, want) {
+			t.Errorf("tarot share missing %q", want)
+		}
+	}
+	// After "Read Card" the share button arrives out of band in the sheet header.
+	if !strings.Contains(body, `id="sheet-share" hx-swap-oob="true"`) || !strings.Contains(body, `popovertarget="share-panel"`) || !strings.Contains(body, `data-share-app="instagram"`) || !strings.Contains(body, `data-share-app="tiktok"`) {
+		t.Error("tarot read must swap in the share button with Instagram and TikTok")
+	}
+	// The share image gets the card face and the readable text.
+	for _, want := range []string{`data-card-heading="Tarot · Love"`, `data-card-images="/static/images/tarot/6.png"`, `data-card-body="The Lovers`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("share card missing %q", want)
+		}
+	}
+	// Before the card is read there is nothing to share.
+	_, body = ta.do(t, c, "POST", "/tarot/1/pick", url.Values{"card": {"6"}}, map[string]string{"HX-Request": "true"})
+	if strings.Contains(body, "data-share") {
+		t.Error("share bar must not show before the reading")
+	}
+	// Matrix shares its purposes even when the text reading is unavailable.
+	_, body = ta.do(t, c, "POST", "/matrix-destiny", url.Values{"name": {"viky arifian"}, "birthday": {"1990-08-17"}}, map[string]string{"HX-Request": "true"})
+	if !strings.Contains(body, "data-share") || !strings.Contains(body, url.QueryEscape("Personal purpose 7")) {
+		t.Error("matrix share must include the purposes")
+	}
+	if !strings.Contains(body, "data-card-chart") {
+		t.Error("matrix share image must draw the chart")
+	}
+	// Errors have no share bar.
+	_, body = ta.do(t, c, "POST", "/clairvoyance/1", url.Values{"name": {""}}, map[string]string{"HX-Request": "true"})
+	if strings.Contains(body, "data-share") {
+		t.Error("validation errors must not offer sharing")
+	}
+}

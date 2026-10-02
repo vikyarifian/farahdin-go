@@ -100,6 +100,8 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key !== "Escape") return;
+    if (document.querySelector("dialog[open]")) return; // the dialog handles its own Escape
+    try { if (document.querySelector(":popover-open")) return; } catch (_) { /* no popover support */ }
     var sheets = document.querySelectorAll("[data-result-sheet]");
     if (sheets.length) closeSheet(sheets[sheets.length - 1]);
   });
@@ -129,6 +131,39 @@
     div.textContent = t("Tidak ada koneksi. Periksa internet kamu lalu coba lagi.",
       "No connection. Check your internet and try again.");
     target.replaceChildren(div);
+  });
+
+  // --- Share bar: native share sheet and copy, where supported ---------------
+  function enableShare(root) {
+    (root || document).querySelectorAll("[data-share-native]").forEach(function (b) {
+      if (navigator.share) b.hidden = false;
+    });
+    (root || document).querySelectorAll("[data-share-copy]").forEach(function (b) {
+      if (navigator.clipboard && window.isSecureContext) b.hidden = false;
+    });
+  }
+  document.addEventListener("DOMContentLoaded", function () { enableShare(); });
+  document.addEventListener("htmx:afterSettle", function (e) { enableShare(e.target); });
+
+  document.addEventListener("click", function (e) {
+    var native = e.target.closest("[data-share-native]");
+    if (native) {
+      navigator.share({ title: native.dataset.title, text: native.dataset.text, url: native.dataset.url })
+        .catch(function () { /* cancelled by the user */ });
+      return;
+    }
+    var copy = e.target.closest("[data-share-copy]");
+    if (copy) {
+      navigator.clipboard.writeText(copy.dataset.text).then(function () {
+        var status = copy.parentElement.querySelector("[data-share-status]");
+        if (status) status.textContent = copy.dataset.copied;
+        copy.querySelector("use").setAttribute("href", copy.querySelector("use").getAttribute("href").replace("#i-copy-outline", "#i-checkmark-outline"));
+        setTimeout(function () {
+          copy.querySelector("use").setAttribute("href", copy.querySelector("use").getAttribute("href").replace("#i-checkmark-outline", "#i-copy-outline"));
+          if (status) status.textContent = "";
+        }, 2000);
+      });
+    }
   });
 
   // --- Close the language dropdown when clicking elsewhere ------------------

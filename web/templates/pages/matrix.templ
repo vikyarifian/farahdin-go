@@ -34,7 +34,7 @@ templ MatrixResult(v MatrixView) {
 	if v.Error != "" {
 		@components.Alert(v.Error)
 	} else if v.Result != nil {
-		@components.ResultSheet(i18n.T(ctx, "Matriks Takdir", "Matrix Destiny"), v.Topic.Label(i18n.Lang(ctx)), "/matrix-destiny") {
+		@components.ResultSheet(i18n.T(ctx, "Matriks Takdir", "Matrix Destiny"), v.Topic.Label(i18n.Lang(ctx)), "/matrix-destiny", v.Share) {
 			@matrixBody(*v.Result)
 		}
 	}

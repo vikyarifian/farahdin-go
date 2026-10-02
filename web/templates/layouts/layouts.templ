@@ -36,6 +36,7 @@ templ Base(title string) {
 			<link rel="stylesheet" href={ web.Asset("css/app.css") }/>
 			<script src={ web.Asset("js/htmx.min.js") } defer></script>
 			<script src={ web.Asset("js/app.js") } defer></script>
+			<script src={ web.Asset("js/share-card.js") } defer></script>
 		</head>
 		<body class="min-h-dvh bg-background font-sans text-white antialiased">
 			<a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-primary focus:px-3 focus:py-2 focus:text-black">{ i18n.T(ctx, "Lewati ke konten", "Skip to content") }</a>

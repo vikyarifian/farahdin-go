@@ -147,6 +147,16 @@ Errors: source `alert()`s validation and leaves the spinner running; reading fai
 
 ---
 
+### Feature: Share a result (new in the PWA, D-30)
+
+**Entry point:** "Share" / "Bagikan" button at the top right of any result sheet (popover panel, D-31); for Tarot it appears after "Read Card".
+**Primary:** Instagram and TikTok share the generated image file via the system share sheet (no web share links exist for them); otherwise the image is downloaded with an upload hint.
+**Message:** `🔮 <feature> · <topic>` + optional highlight (Primbon Jodoh love score, Matrix purposes) + excerpt + "Get your own reading on Farahdin:" + `BASE_URL/`.
+**Channels:** native share sheet (shown only where `navigator.share` exists), WhatsApp, Telegram, X, Facebook (URL only), copy to clipboard (shown only in secure contexts).
+**Image:** "Image" opens a preview of a 1080×1350 card (Canvas API, ~0.2 s, ~150–250 KB JPEG) with "Share image" (only where `navigator.canShare({files})` is true) and "Download".
+**Without JS:** the four links still work. **Privacy:** nothing is stored or published by the app; the user chooses what to send.
+**Not shared:** validation/upstream errors, Tarot before the card is read.
+
 ## Behavioral Equivalence
 
 A PWA implementation is equivalent when the user-visible business outcome and important interaction semantics match the source behavior.

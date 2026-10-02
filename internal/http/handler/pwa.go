@@ -114,6 +114,7 @@ func (a *App) serviceWorker(w http.ResponseWriter, r *http.Request) {
 		"/offline",
 		web.Asset("css/app.css"),
 		web.Asset("js/app.js"),
+		web.Asset("js/share-card.js"),
 		web.Asset("js/htmx.min.js"),
 		web.Asset("icons/sprite.svg"),
 		web.Asset("icons/icon-192.png"),
