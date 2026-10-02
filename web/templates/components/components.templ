@@ -268,12 +268,12 @@ templ sharePanel(s Share) {
 			</button>
 		</div>
 		<div data-share-image-area hidden>
-			<div class="mx-auto mt-3 flex aspect-[9/16] w-40 items-center justify-center overflow-hidden rounded-lg bg-black/30">
+			<div class="mx-auto mt-3 flex aspect-[9/16] h-[min(50dvh,32rem)] items-center justify-center overflow-hidden rounded-lg bg-black/30">
 				<span class="spinner" data-share-loading aria-hidden="true"></span>
 				<img data-share-preview hidden alt={ i18n.T(ctx, "Pratinjau gambar hasil", "Preview of the result image") } class="size-full object-contain"/>
 			</div>
 			<p data-share-error hidden role="alert" class="mt-2 text-center text-sm text-red-300">{ i18n.T(ctx, "Gambar gagal dibuat. Coba lagi.", "Could not create the image. Please try again.") }</p>
-			<div class="mt-4 grid grid-cols-2 gap-2">
+			<div class="mx-auto mt-3 grid w-fit grid-cols-2 gap-2">
 				@appButton("instagram", "logo-instagram", "Instagram")
 				@appButton("tiktok", "logo-tiktok", "TikTok")
 			</div>
@@ -318,16 +318,16 @@ templ sharePanel(s Share) {
 	</div>
 }
 
-const roundButton = "inline-flex size-10 items-center justify-center rounded-full border border-muted text-white transition hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+const roundButton = "inline-flex size-9 items-center justify-center rounded-full border border-muted text-white transition hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
 
 templ appButton(app string, icon string, label string) {
 	<button
 		type="button"
 		hidden
 		data-share-app={ app }
-		class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-3 font-semibold text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+		class="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full bg-primary px-3.5 text-sm font-semibold text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
 	>
-		@Icon(icon, "size-6")
+		@Icon(icon, "size-4")
 		{ label }
 	</button>
 }

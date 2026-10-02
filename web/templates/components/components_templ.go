@@ -1489,7 +1489,7 @@ func sharePanel(s Share) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "</button></div><div data-share-image-area hidden><div class=\"mx-auto mt-3 flex aspect-[9/16] w-40 items-center justify-center overflow-hidden rounded-lg bg-black/30\"><span class=\"spinner\" data-share-loading aria-hidden=\"true\"></span> <img data-share-preview hidden alt=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "</button></div><div data-share-image-area hidden><div class=\"mx-auto mt-3 flex aspect-[9/16] h-[min(50dvh,32rem)] items-center justify-center overflow-hidden rounded-lg bg-black/30\"><span class=\"spinner\" data-share-loading aria-hidden=\"true\"></span> <img data-share-preview hidden alt=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1515,7 +1515,7 @@ func sharePanel(s Share) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</p><div class=\"mt-4 grid grid-cols-2 gap-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</p><div class=\"mx-auto mt-3 grid w-fit grid-cols-2 gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1771,7 +1771,7 @@ func sharePanel(s Share) templ.Component {
 	})
 }
 
-const roundButton = "inline-flex size-10 items-center justify-center rounded-full border border-muted text-white transition hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+const roundButton = "inline-flex size-9 items-center justify-center rounded-full border border-muted text-white transition hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
 
 func appButton(app string, icon string, label string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -1807,11 +1807,11 @@ func appButton(app string, icon string, label string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "\" class=\"inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-3 font-semibold text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 119, "\" class=\"inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full bg-primary px-3.5 text-sm font-semibold text-black transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = Icon(icon, "size-6").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = Icon(icon, "size-4").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
